@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather';
+import { Feather } from '@expo/vector-icons';
 import { colors, fonts } from '../constants/theme';
 
 export default function CheckboxOption({ label, selected, onPress, compact = false }) {

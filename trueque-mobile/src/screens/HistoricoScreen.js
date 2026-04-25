@@ -38,7 +38,7 @@ function formatHistoricDate(dateValue) {
   return `${date.getDate()} de ${MONTHS[date.getMonth()]} de ${date.getFullYear()}`;
 }
 
-export default function HistoricoScreen() {
+export default function HistoricoScreen({ navigation }) {
   const [cedula, setCedula] = useState('');
   const [nombre, setNombre] = useState('');
   const [selectedYear, setSelectedYear] = useState('2026');
@@ -91,7 +91,7 @@ export default function HistoricoScreen() {
 
   return (
     <View style={styles.screen}>
-      <AppHeader title="Consulta Historica" />
+      <AppHeader title="Consulta Histórica" showBack navigation={navigation} />
       <FlatList
         data={visibleItems}
         keyExtractor={(item) => `${item.id}`}

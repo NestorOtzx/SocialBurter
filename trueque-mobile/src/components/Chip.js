@@ -18,9 +18,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 999,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
-    backgroundColor: colors.chipBackground,
+    backgroundColor: colors.background,
     marginRight: 8,
     marginBottom: 10,
   },
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   selectedChip: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primarySurface,
     borderColor: colors.primary,
   },
   label: {
@@ -47,6 +47,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   selectedLabel: {
-    color: colors.background,
+    color: colors.primary,
   },
 });

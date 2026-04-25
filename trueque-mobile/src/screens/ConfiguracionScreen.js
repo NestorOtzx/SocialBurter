@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
+import AppHeader from '../components/AppHeader';
 import InputField from '../components/InputField';
 import { TIE_BREAKERS } from '../constants/options';
 import { colors, fonts, spacing } from '../constants/theme';
@@ -56,7 +57,7 @@ function rebalanceWeights(currentWeights, changedKey, nextValue) {
   return nextWeights;
 }
 
-export default function ConfiguracionScreen() {
+export default function ConfiguracionScreen({ navigation }) {
   const [year, setYear] = useState(DEFAULT_YEAR);
   const [weights, setWeights] = useState({
     diversidad: 25,
@@ -124,7 +125,8 @@ export default function ConfiguracionScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
+      <AppHeader title="Configurar Reglas" showBack navigation={navigation} />
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Parametrizacion Anual</Text>
         <View style={styles.divider} />
@@ -189,7 +191,7 @@ export default function ConfiguracionScreen() {
           <Text style={styles.saveButtonText}>{saving ? 'Guardando...' : 'Guardar Configuración'}</Text>
         </Pressable>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

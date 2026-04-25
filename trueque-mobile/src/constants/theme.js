@@ -1,22 +1,32 @@
 import { Platform } from 'react-native';
 
 export const colors = {
-  primary: '#2596be',
-  secondaryBlue: '#3B82F6',
-  orange: '#F97316',
-  text: '#333333',
-  mutedText: '#666666',
-  lightText: '#888888',
-  border: '#E0E0E0',
+  primary: '#2D6A4F',
+  primaryLight: '#40916C',
+  primarySurface: '#D8F3DC',
+  accent: '#D9730D',
+  accentLight: '#F4A261',
+  text: '#1A2E1F',
+  mutedText: '#5A7060',
+  lightText: '#8FA693',
+  border: '#D6E4DA',
   background: '#FFFFFF',
-  surface: '#F8FAFC',
-  success: '#16A34A',
-  warningBackground: '#FFF3CD',
-  warningText: '#856404',
-  chipBackground: '#F1F5F9',
-  blueLight: '#E0F2FE',
-  shadow: '#0F172A',
-  error: '#DC2626',
+  surface: '#F9F5EF',
+  surfaceWarm: '#FEF9F0',
+  success: '#2D6A4F',
+  warningBackground: '#FEF3E2',
+  warningText: '#92400E',
+  chipBackground: '#D8F3DC',
+  shadow: '#0A1F10',
+  error: '#C0392B',
+  // Ranking podio
+  gold: '#F4A261',
+  silver: '#95D5B2',
+  bronze: '#D4A373',
+  // Compatibilidad
+  secondaryBlue: '#40916C',
+  orange: '#D9730D',
+  blueLight: '#D8F3DC',
 };
 
 export const fonts = {

@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   inputContainer: {
-    minHeight: 50,
-    borderWidth: 1,
+    minHeight: 52,
+    borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: 12,
     backgroundColor: colors.background,
@@ -81,7 +81,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   disabledContainer: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
   },
   input: {
     flex: 1,
