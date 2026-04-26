@@ -101,7 +101,7 @@ export default function RegistroWizard({ navigation, route, tipoRegistro = 'pre'
 
   return (
     <View style={styles.screen}>
-      <AppHeader title={screenTitle} />
+      <AppHeader title={screenTitle} showBack navigation={navigation} />
       <Stepper currentStep={completed ? 3 : step} steps={REGISTRO_STEPS[tipoRegistro]} />
       <View style={styles.content}>{renderCurrentStep()}</View>
     </View>

@@ -12,12 +12,12 @@ export default function Stepper({ currentStep, steps = REGISTRO_STEPS.pre }) {
 
         return (
           <View key={step.number} style={styles.item}>
-            <View style={[styles.circle, (isActive || isCompleted) && styles.activeCircle]}>
-              <Text style={[styles.number, (isActive || isCompleted) && styles.activeNumber]}>
-                {step.number}
+            <View style={[styles.circle, isCompleted && styles.completedCircle, isActive && styles.activeCircle]}>
+              <Text style={[styles.number, isCompleted && styles.completedNumber, isActive && styles.activeNumber]}>
+                {isCompleted ? '✓' : step.number}
               </Text>
             </View>
-            <Text style={[styles.label, isActive && styles.activeLabel]}>{step.label}</Text>
+            <Text style={[styles.label, isActive && styles.activeLabel, isCompleted && styles.completedLabel]}>{step.label}</Text>
             {index < steps.length - 1 ? <View style={[styles.line, isCompleted && styles.activeLine]} /> : null}
           </View>
         );
@@ -51,17 +51,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 2,
   },
-  activeCircle: {
+  completedCircle: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
+  },
+  activeCircle: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
   },
   number: {
     fontSize: 14,
     color: colors.mutedText,
     fontFamily: fonts.semibold,
   },
+  completedNumber: {
+    color: '#FFFFFF',
+    fontSize: 12,
+  },
   activeNumber: {
-    color: colors.background,
+    color: '#FFFFFF',
   },
   label: {
     marginTop: 8,
@@ -70,8 +78,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     textAlign: 'center',
   },
-  activeLabel: {
+  completedLabel: {
     color: colors.primary,
+  },
+  activeLabel: {
+    color: colors.accent,
+    fontFamily: 'Inter_600SemiBold',
   },
   line: {
     position: 'absolute',

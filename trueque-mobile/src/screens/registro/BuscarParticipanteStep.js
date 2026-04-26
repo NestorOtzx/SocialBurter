@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather';
+import { Feather } from '@expo/vector-icons';
 import InputField from '../../components/InputField';
 import { colors, fonts, spacing } from '../../constants/theme';
 import { searchParticipantRequest } from '../../services/api';
