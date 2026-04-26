@@ -13,6 +13,17 @@ export interface Participant {
   name: string;
   municipality: string;
   village: string;
+  phone?: string;
+  annualTrades?: number;
+  farmName?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  altitude?: number | null;
+  corregimiento?: string;
+  soilType?: string;
+  climateConditions?: string;
+  productiveSystems?: string[];
+  leadership?: string[];
   createdBy?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -56,6 +67,9 @@ export interface RankingResult {
   name: string;
   diversity: number;
   volume: number;
+  practices: number;
+  leadership: number;
+  score?: number;
 }
 
 export interface EventRule {
@@ -63,7 +77,9 @@ export interface EventRule {
   eventYear: number;
   diversityWeight: number;
   volumeWeight: number;
-  tieBreaker: 'diversity' | 'volume';
+  practiceWeight: number;
+  leadershipWeight: number;
+  tieBreaker: 'diversity' | 'volume' | 'practices' | 'leadership';
   updatedAt?: string;
 }
 
