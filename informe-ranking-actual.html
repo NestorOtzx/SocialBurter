@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Informe - Funcionamiento actual del ranking</title>
+  <style>
+    :root {
+      --ink: #173126;
+      --muted: #5b6f66;
+      --line: #d6e2db;
+      --soft: #f4f8f6;
+      --accent: #2d6a4f;
+      --accent-soft: #d8f3dc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #f8fbf9 0%, #eef5f1 100%);
+      line-height: 1.55;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 44px 56px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--accent) 0%, #1f513d 100%);
+      color: #fff;
+      border-radius: 22px;
+      padding: 28px 30px;
+      box-shadow: 0 14px 34px rgba(23, 49, 38, 0.16);
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 760px;
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .meta {
+      margin-top: 14px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(35, 56, 46, 0.05);
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: var(--accent);
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    section {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 24px rgba(35, 56, 46, 0.05);
+    }
+
+    h3 {
+      margin: 0 0 12px;
+      font-size: 22px;
+      color: var(--accent);
+    }
+
+    p {
+      margin: 0 0 12px;
+      font-size: 14px;
+    }
+
+    ul {
+      margin: 10px 0 14px 20px;
+      padding: 0;
+    }
+
+    li {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    code, pre {
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    pre {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      overflow: hidden;
+      white-space: pre-wrap;
+      font-size: 13px;
+      color: #214234;
+      margin: 10px 0 14px;
+    }
+
+    .note {
+      background: var(--accent-soft);
+      border-left: 4px solid var(--accent);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-top: 10px;
+    }
+
+    .foot {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .page {
+        max-width: none;
+        padding: 18px 18px 28px;
+      }
+
+      .hero,
+      .card,
+      section {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="eyebrow">Informe funcional</div>
+      <h1>Funcionamiento actual del ranking</h1>
+      <p>
+        Este documento resume como esta operando hoy el ranking en el proyecto,
+        que variables influyen en el puntaje, como afectan los pesos configurables
+        y que diferencias existen entre lo que la interfaz muestra y lo que el backend
+        realmente calcula.
+      </p>
+      <div class="meta">Proyecto: SocialBurter | Fecha: 26 de abril de 2026</div>
+    </header>
+
+    <section class="summary">
+      <article class="card">
+        <h2>Calculo real</h2>
+        <p>Hoy el puntaje solo usa diversidad y volumen.</p>
+      </article>
+      <article class="card">
+        <h2>Configuraciónvisible</h2>
+        <p>La app permite ajustar 4 pesos, pero 2 de ellos aun no participan en el ranking.</p>
+      </article>
+      <article class="card">
+        <h2>Riesgo principal</h2>
+        <p>El volumen tiende a dominar el score porque no hay normalizaciónentre criterios.</p>
+      </article>
+    </section>
+
+    <section>
+      <h3>1. Como se calcula hoy</h3>
+      <p>
+        El endpoint principal es <code>GET /ranking?eventYear=YYYY</code>. Para ese ano,
+        el backend busca una regla de configuraciónen <code>event_rules</code>, agrupa los aportes
+        por participante y calcula dos metricas:
+      </p>
+      <ul>
+        <li><strong>Diversidad:</strong> cantidad de variedades distintas registradas.</li>
+        <li><strong>Volumen:</strong> suma total de cantidades registradas en los aportes.</li>
+      </ul>
+      <p>La formula real del puntaje es:</p>
+      <pre>score = diversity * diversityWeight + volume * volumeWeight</pre>
+      <p>
+        Si no existe una regla guardada para ese ano, el backend usa valores por defecto:
+      </p>
+      <ul>
+        <li><code>diversityWeight = 1</code></li>
+        <li><code>volumeWeight = 1</code></li>
+        <li><code>tieBreaker = "diversity"</code></li>
+      </ul>
+      <p>En otras palabras, el comportamiento por defecto es:</p>
+      <pre>puntaje = diversidad + volumen</pre>
+    </section>
+
+    <section>
+      <h3>2. Que si afecta el ranking</h3>
+      <ul>
+        <li>La cantidad de variedades distintas registradas en <code>pr.variety</code>.</li>
+        <li>La suma de cantidades registradas en <code>pr.quantity</code>.</li>
+        <li>El año del aporte, filtrado por <code>pr.event_year</code>.</li>
+        <li>La regla de desempate guardada para ese ano.</li>
+      </ul>
+      <div class="note">
+        La diversidad se calcula con un <code>COUNT(DISTINCT LOWER(TRIM(pr.variety)))</code>.
+        Eso significa que el sistema intenta evitar diferencias por mayusculas, minusculas y espacios
+        al principio o al final.
+      </div>
+    </section>
+
+    <section>
+      <h3>3. Que no afecta hoy el ranking</h3>
+      <p>
+        Aunque la configuraciónde la app presenta cuatro criterios, el backend actual no usa
+        estas variables dentro del puntaje:
+      </p>
+      <ul>
+        <li><strong>Practicas sostenibles</strong></li>
+        <li><strong>Liderazgo</strong></li>
+      </ul>
+      <p>
+        La app guarda esos valores al enviar la configuracion, pero el backend no los persiste
+        ni los usa al calcular el score.
+      </p>
+    </section>
+
+    <section>
+      <h3>4. Como afectan los pesos</h3>
+      <p>
+        En la pantalla de configuracion, los sliders se trabajan como porcentajes. Por ejemplo,
+        25% se envia como <code>0.25</code>. El backend solo utiliza:
+      </p>
+      <ul>
+        <li><code>diversityWeight</code></li>
+        <li><code>volumeWeight</code></li>
+        <li><code>tieBreaker</code></li>
+      </ul>
+      <p>Ejemplo real:</p>
+      <pre>Diversidad = 4
+Volumen = 100
+Peso diversidad = 0.25
+Peso volumen = 0.25
+
+score = 4 * 0.25 + 100 * 0.25
+score = 1 + 25
+score = 26</pre>
+      <p>
+        Esto deja una consecuencia importante: aunque ambos pesos parezcan "iguales",
+        el volumen suele dominar el score porque opera sobre magnitudes mucho mas grandes
+        que la diversidad.
+      </p>
+    </section>
+
+    <section>
+      <h3>5. Desempates</h3>
+      <p>El backend solo contempla dos desempates reales:</p>
+      <ul>
+        <li><code>diversity</code></li>
+        <li><code>volume</code></li>
+      </ul>
+      <p>La logica es esta:</p>
+      <ul>
+        <li>Primero ordena por <code>score</code> de mayor a menor.</li>
+        <li>Si empatan y el desempate es <code>diversity</code>, gana mayor diversidad y luego mayor volumen.</li>
+        <li>En cualquier otro caso, gana mayor volumen y luego mayor diversidad.</li>
+      </ul>
+      <p>
+        La interfaz movil ofrece tambien desempates por practicas sostenibles y liderazgo,
+        pero el backend no los interpreta. Si el usuario guarda esos valores, el comportamiento
+        efectivo termina siendo equivalente al desempate por volumen.
+      </p>
+    </section>
+
+    <section>
+      <h3>6. Diferencia entre la UI y la logica real</h3>
+      <p>Hoy existe una brecha clara entre lo que la app comunica y lo que realmente sucede:</p>
+      <ul>
+        <li>La pantalla de configuraciónpermite editar cuatro pesos: diversidad, volumen, practicas y liderazgo.</li>
+        <li>La formula del backend solo usa diversidad y volumen.</li>
+        <li>La UI permite elegir cuatro criterios de desempate.</li>
+        <li>El backend solo soporta diversidad o volumen.</li>
+      </ul>
+      <div class="note">
+        En la practica, la configuraciónactual puede inducir a error al equipo operativo,
+        porque da a entender que practicas y liderazgo ya hacen parte del ranking cuando aun no es asi.
+      </div>
+    </section>
+
+    <section>
+      <h3>7. Pantalla de ranking</h3>
+      <p>La pantalla de ranking actual refleja correctamente lo que el backend si calcula hoy.</p>
+      <ul>
+        <li>Muestra nombre, cedula, diversidad, volumen y puntaje.</li>
+        <li>No muestra practicas ni liderazgo.</li>
+        <li>La posiciónse deriva del orden ya calculado por el backend.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>8. Historico</h3>
+      <p>
+        Existe un endpoint de ranking historico en backend, pero la pantalla "Historico"
+        del movil no lo usa. Actualmente esa pantalla consulta aportes historicos, no posiciones
+        de ranking historicas.
+      </p>
+      <ul>
+        <li><strong>Backend disponible:</strong> <code>GET /ranking/historical?cedula=...</code></li>
+        <li><strong>Frontend actual:</strong> consulta <code>GET /participants/contributions</code></li>
+      </ul>
+      <p>
+        Eso significa que hoy "historico" en la app equivale a historial de aportes,
+        no a historial de puntajes o lugares ocupados en el ranking.
+      </p>
+    </section>
+
+    <section>
+      <h3>9. Resumen ejecutivo</h3>
+      <ul>
+        <li>El ranking real usa solo diversidad y volumen.</li>
+        <li>Los pesos de practicas y liderazgo aun no tienen efecto real.</li>
+        <li>Los desempates de practicas y liderazgo tampoco funcionan en backend.</li>
+        <li>El volumen probablemente domina el score por escala.</li>
+        <li>La pantalla historica actual no muestra ranking historico, sino contribuciones historicas.</li>
+      </ul>
+      <p class="foot">
+        Recomendacion: o bien se simplifica la UI de configuraciónpara que refleje el ranking actual,
+        o bien se completa la implementacióndel backend para incorporar practicas, liderazgo
+        y sus desempates de forma coherente.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

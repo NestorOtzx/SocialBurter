@@ -1,60 +1,47 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Slider from '@react-native-community/slider';
 import AppHeader from '../components/AppHeader';
 import InputField from '../components/InputField';
+import SegmentedPercentageEditor from '../components/SegmentedPercentageEditor';
 import { TIE_BREAKERS } from '../constants/options';
 import { colors, fonts, spacing } from '../constants/theme';
 import { fetchConfigurationRequest, saveConfigurationRequest } from '../services/api';
 
 const DEFAULT_YEAR = '2026';
 const WEIGHT_KEYS = ['diversidad', 'volumen', 'practicas', 'liderazgo'];
+const CRITERION_SEGMENTS = [
+  { key: 'diversidad', label: 'Diversidad', color: '#95D5B2' },
+  { key: 'volumen', label: 'Volumen', color: '#74C69D' },
+  { key: 'practicas', label: 'Practicas', color: '#FFD166' },
+  { key: 'liderazgo', label: 'Liderazgo', color: '#F4978E' },
+];
+const CRITERION_DETAILS = [
+  {
+    key: 'diversidad',
+    title: 'Diversidad',
+    description: 'Valora la cantidad de variedades distintas aportadas por cada participante.',
+  },
+  {
+    key: 'volumen',
+    title: 'Volumen',
+    description: 'Valora la cantidad total registrada en los aportes del participante.',
+  },
+  {
+    key: 'practicas',
+    title: 'Practicas sostenibles',
+    description:
+      'Aplica cuando la producciónes agroecologica, silvopastoril o con practicas ancestrales.',
+  },
+  {
+    key: 'liderazgo',
+    title: 'Liderazgo',
+    description:
+      'Aplica cuando el sistema productivo es liderado por mujeres y/o jovenes.',
+  },
+];
 
 function sumWeights(weights) {
   return WEIGHT_KEYS.reduce((sum, key) => sum + (weights[key] || 0), 0);
-}
-
-function rebalanceWeights(currentWeights, changedKey, nextValue) {
-  const boundedValue = Math.max(0, Math.min(100, nextValue));
-  const nextWeights = { ...currentWeights, [changedKey]: boundedValue };
-  const remainingKeys = WEIGHT_KEYS.filter((key) => key !== changedKey);
-  const remainingTotal = Math.max(0, 100 - boundedValue);
-  const currentTotal = remainingKeys.reduce((sum, key) => sum + currentWeights[key], 0);
-
-  if (!remainingKeys.length) {
-    return nextWeights;
-  }
-
-  if (!currentTotal) {
-    const base = Math.floor(remainingTotal / remainingKeys.length);
-    let assigned = 0;
-
-    remainingKeys.forEach((key, index) => {
-      if (index === remainingKeys.length - 1) {
-        nextWeights[key] = remainingTotal - assigned;
-      } else {
-        nextWeights[key] = base;
-        assigned += base;
-      }
-    });
-
-    return nextWeights;
-  }
-
-  let assigned = 0;
-
-  remainingKeys.forEach((key, index) => {
-    if (index === remainingKeys.length - 1) {
-      nextWeights[key] = remainingTotal - assigned;
-    } else {
-      const scaled = Math.round((currentWeights[key] / currentTotal) * remainingTotal);
-      nextWeights[key] = scaled;
-      assigned += scaled;
-    }
-  });
-
-  return nextWeights;
 }
 
 export default function ConfiguracionScreen({ navigation }) {
@@ -67,16 +54,8 @@ export default function ConfiguracionScreen({ navigation }) {
   });
   const [desempate, setDesempate] = useState('diversity');
   const [saving, setSaving] = useState(false);
-
-  const sliderItems = useMemo(
-    () => [
-      { key: 'diversidad', label: 'Diversidad' },
-      { key: 'volumen', label: 'Volumen' },
-      { key: 'practicas', label: 'Prácticas sostenibles' },
-      { key: 'liderazgo', label: 'Liderazgo (mujeres/jóvenes)' },
-    ],
-    []
-  );
+  const totalWeight = sumWeights(weights);
+  const canSave = totalWeight === 100 && /^\d{4}$/.test(year) && !saving;
 
   const loadConfiguration = async (eventYear) => {
     try {
@@ -84,7 +63,7 @@ export default function ConfiguracionScreen({ navigation }) {
       setWeights(rule.pesos);
       setDesempate(rule.tieBreaker || 'diversity');
     } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error de red. Intenta nuevamente.');
+      Alert.alert('Error', 'Ocurrio un error de red. Intenta nuevamente.');
     }
   };
 
@@ -94,18 +73,14 @@ export default function ConfiguracionScreen({ navigation }) {
     }
   }, [year]);
 
-  const handleSliderChange = (key, value) => {
-    setWeights((current) => rebalanceWeights(current, key, value));
-  };
-
   const handleSave = async () => {
     if (!/^\d{4}$/.test(year)) {
-      Alert.alert('Validación', 'Ingresa un año válido de 4 dígitos.');
+      Alert.alert('Validacion', 'Ingresa un año valido de 4 digitos.');
       return;
     }
 
-    if (sumWeights(weights) !== 100) {
-      Alert.alert('Validación', 'Los pesos deben sumar 100%');
+    if (totalWeight !== 100) {
+      Alert.alert('Validacion', 'Los pesos deben sumar 100%.');
       return;
     }
 
@@ -116,9 +91,9 @@ export default function ConfiguracionScreen({ navigation }) {
         pesos: weights,
         tieBreaker: desempate,
       });
-      Alert.alert('Éxito', 'Configuración guardada correctamente.');
+      Alert.alert('Exito', 'Configuraciónguardada correctamente.');
     } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error de red. Intenta nuevamente.');
+      Alert.alert('Error', 'Ocurrio un error de red. Intenta nuevamente.');
     } finally {
       setSaving(false);
     }
@@ -128,52 +103,50 @@ export default function ConfiguracionScreen({ navigation }) {
     <View style={styles.safeArea}>
       <AppHeader title="Configurar Reglas" showBack navigation={navigation} />
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Parametrizacion Anual</Text>
+        <Text style={styles.title}>Parametrizaciónanual</Text>
         <View style={styles.divider} />
 
-        <Text style={styles.subtitle}>Reglas de Ranking</Text>
-        <Text style={styles.subtitleHelper}>Configura los parámetros del sistema de puntuación</Text>
+        <Text style={styles.subtitle}>Reglas de ranking</Text>
+        <Text style={styles.subtitleHelper}>
+          Ajusta los porcentajes del sistema escribiendo los valores de cada criterio. La barra se actualiza de inmediato para reflejar lo que ingresas.
+        </Text>
 
         <InputField
-          label="Año del evento"
+          label="Ano del evento"
           value={year}
           onChangeText={setYear}
           keyboardType="numeric"
           maxLength={4}
         />
 
-        <Text style={styles.sectionTitle}>Pesos de Criterios</Text>
-        <Text style={styles.inlineHelper}>Define la importancia</Text>
+        <Text style={styles.sectionTitle}>Pesos de criterios</Text>
+        <Text style={styles.inlineHelper}>
+          No hay redistribuciónautomatica. Debes completar manualmente el total hasta llegar a 100%.
+        </Text>
 
-        {sliderItems.map((item) => (
-          <View key={item.key} style={styles.sliderBlock}>
-            <View style={styles.sliderHeader}>
-              <Text style={item.key === 'diversidad' ? styles.sliderTitleBold : styles.sliderTitle}>
-                {item.label}
-              </Text>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{weights[item.key]}%</Text>
-              </View>
+        <SegmentedPercentageEditor
+          segments={CRITERION_SEGMENTS}
+          values={weights}
+          onChange={setWeights}
+        />
+
+        <Text style={styles.infoTitle}>Detalle de criterios</Text>
+        <View style={styles.criteriaList}>
+          {CRITERION_DETAILS.map((criterion, index) => (
+            <View key={criterion.key} style={[styles.criteriaCard, index === CRITERION_DETAILS.length - 1 && styles.criteriaCardLast]}>
+              <Text style={styles.criteriaTitle}>{criterion.title}</Text>
+              <Text style={styles.criteriaDescription}>{criterion.description}</Text>
             </View>
-            <Slider
-              minimumValue={0}
-              maximumValue={100}
-              step={1}
-              minimumTrackTintColor={colors.secondaryBlue}
-              maximumTrackTintColor={colors.border}
-              thumbTintColor={colors.secondaryBlue}
-              value={weights[item.key]}
-              onValueChange={(value) => handleSliderChange(item.key, value)}
-            />
-            <Text style={styles.sliderValue}>Valor actual: {weights[item.key]}%</Text>
-          </View>
-        ))}
+          ))}
+        </View>
 
-        <Text style={styles.infoTitle}>Información</Text>
-        <Text style={styles.infoText}>Los pesos serán normalizados automáticamente.</Text>
-        <Text style={styles.totalText}>Total actual: {sumWeights(weights)}%</Text>
+        <Text style={styles.infoTitle}>Estado actual</Text>
+        <Text style={styles.infoText}>
+          La barra refleja exactamente lo que escribes. Si falta o sobra porcentaje, no podras guardar la configuracion.
+        </Text>
+        <Text style={styles.totalText}>Total actual: {totalWeight}%</Text>
 
-        <Text style={styles.radioLabel}>Criterio para resolver</Text>
+        <Text style={styles.radioLabel}>Criterio para resolver empates</Text>
         {TIE_BREAKERS.map((item) => (
           <Pressable key={item.value} style={styles.radioRow} onPress={() => setDesempate(item.value)}>
             <View style={[styles.radioOuter, desempate === item.value && styles.radioOuterSelected]}>
@@ -184,11 +157,11 @@ export default function ConfiguracionScreen({ navigation }) {
         ))}
 
         <Pressable
-          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+          style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
           onPress={handleSave}
-          disabled={saving}
+          disabled={!canSave}
         >
-          <Text style={styles.saveButtonText}>{saving ? 'Guardando...' : 'Guardar Configuración'}</Text>
+          <Text style={styles.saveButtonText}>{saving ? 'Guardando...' : 'Guardar configuracion'}</Text>
         </Pressable>
       </ScrollView>
     </View>
@@ -226,6 +199,7 @@ const styles = StyleSheet.create({
     color: colors.mutedText,
     marginTop: 8,
     marginBottom: spacing.lg,
+    lineHeight: 20,
     fontFamily: fonts.regular,
   },
   sectionTitle: {
@@ -236,65 +210,58 @@ const styles = StyleSheet.create({
   inlineHelper: {
     fontSize: 12,
     color: colors.lightText,
-    fontStyle: 'italic',
     marginTop: 6,
     marginBottom: spacing.md,
-    fontFamily: fonts.regular,
-  },
-  sliderBlock: {
-    marginBottom: spacing.md,
-  },
-  sliderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  sliderTitleBold: {
-    fontSize: 16,
-    color: colors.text,
-    fontFamily: fonts.bold,
-  },
-  sliderTitle: {
-    fontSize: 16,
-    color: colors.text,
-    fontFamily: fonts.regular,
-  },
-  badge: {
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: colors.blueLight,
-  },
-  badgeText: {
-    color: colors.secondaryBlue,
-    fontSize: 13,
-    fontFamily: fonts.semibold,
-  },
-  sliderValue: {
-    fontSize: 12,
-    color: colors.mutedText,
+    lineHeight: 18,
     fontFamily: fonts.regular,
   },
   infoTitle: {
     fontSize: 16,
     color: colors.text,
-    marginTop: spacing.sm,
-    fontFamily: fonts.regular,
+    marginTop: spacing.lg,
+    fontFamily: fonts.semibold,
   },
   infoText: {
     fontSize: 12,
     color: colors.lightText,
-    fontStyle: 'italic',
     marginTop: 6,
     marginBottom: 6,
+    lineHeight: 18,
+    fontFamily: fonts.regular,
+  },
+  criteriaList: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  criteriaCard: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 14,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: spacing.sm,
+  },
+  criteriaCardLast: {
+    marginBottom: 0,
+  },
+  criteriaTitle: {
+    fontSize: 14,
+    color: colors.text,
+    fontFamily: fonts.semibold,
+    marginBottom: 4,
+  },
+  criteriaDescription: {
+    fontSize: 12,
+    color: colors.mutedText,
+    lineHeight: 18,
     fontFamily: fonts.regular,
   },
   totalText: {
     fontSize: 14,
     color: colors.text,
     marginBottom: spacing.lg,
-    fontFamily: fonts.semibold,
+    fontFamily: fonts.bold,
   },
   radioLabel: {
     fontSize: 14,
