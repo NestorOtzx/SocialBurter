@@ -4,12 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "mobile": "cd trueque-mobile && npm run web",
-    "backend": "cd trueque-backend && npm run dev",
+    "mobile": "npm --prefix trueque-mobile run web",
+    "backend": "npm --prefix trueque-backend run dev",
     "dev": "concurrently \"npm run mobile\" \"npm run backend\"",
-    "devinstall": "concurrently \"cd trueque-mobile && npm install\" \"cd trueque-backend && npm install\""
-  },
 
+    "install:mobile": "npm --prefix trueque-mobile install",
+    "install:backend": "npm --prefix trueque-backend install",
+    "devinstall": "npm run install:mobile && npm run install:backend",
+
+    "build:mobile": "npm --prefix trueque-mobile run build",
+    "start:backend": "npm --prefix trueque-backend run start"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NestorOtzx/SocialBurter.git"
