@@ -28,6 +28,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
   const { width } = useWindowDimensions();
   const { required, numeric } = useFormValidator();
   const user = useAuthStore((state) => state.user);
+  const tipoRegistro = useRegistroStore((state) => state.tipoRegistro);
   const participanteData = useRegistroStore((state) => state.participanteData);
   const isNewParticipant = useRegistroStore((state) => state.isNewParticipant);
   const mergeParticipantData = useRegistroStore((state) => state.mergeParticipantData);
@@ -40,6 +41,8 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
 
   const useTwoColumns = Platform.OS === 'web' ? width >= 360 : width >= 560;
   const rowStyle = [styles.row, !useTwoColumns && styles.rowStack];
+  const isPreRegistro = tipoRegistro === 'pre';
+  const requirePredioData = completionOnly;
   const corregimientos = useMemo(
     () => CORREGIMIENTOS_BY_MUNICIPIO[participanteData.municipio] || [],
     [participanteData.municipio]
@@ -49,14 +52,14 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
     const nextErrors = {
       nombreCompleto: required(participanteData.nombreCompleto),
       celular: required(participanteData.celular),
-      nombreFinca: required(participanteData.nombreFinca),
-      municipio: required(participanteData.municipio),
-      corregimiento: required(participanteData.corregimiento),
-      vereda: required(participanteData.vereda),
-      tipoSuelo: required(participanteData.tipoSuelo),
-      condicionesClimaticas: required(participanteData.condicionesClimaticas),
-      sistemasProductivos: required(participanteData.sistemasProductivos),
-      liderazgo: required(participanteData.liderazgo),
+      nombreFinca: requirePredioData ? required(participanteData.nombreFinca) : '',
+      municipio: requirePredioData ? required(participanteData.municipio) : '',
+      corregimiento: requirePredioData ? required(participanteData.corregimiento) : '',
+      vereda: requirePredioData ? required(participanteData.vereda) : '',
+      tipoSuelo: requirePredioData ? required(participanteData.tipoSuelo) : '',
+      condicionesClimaticas: requirePredioData ? required(participanteData.condicionesClimaticas) : '',
+      sistemasProductivos: requirePredioData ? required(participanteData.sistemasProductivos) : '',
+      liderazgo: requirePredioData ? required(participanteData.liderazgo) : '',
       truequesAnio: numeric(participanteData.truequesAnio),
       latitud: numeric(participanteData.latitud),
       longitud: numeric(participanteData.longitud),
@@ -94,7 +97,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
         setStep(3);
       }
     } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error de red. Intenta nuevamente.');
+      Alert.alert('Error', 'Ocurrio un error de red. Intenta nuevamente.');
     } finally {
       setSaving(false);
     }
@@ -147,7 +150,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
         disabled={saving}
       >
         <Text style={styles.primaryButtonText}>
-          {saving ? 'Guardando...' : completionOnly ? 'Guardar datos faltantes' : 'Confirmar y continuar →'}
+          {saving ? 'Guardando...' : completionOnly ? 'Guardar datos faltantes' : 'Confirmar y continuar ->'}
         </Text>
       </Pressable>
     </View>
@@ -157,7 +160,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
     <WizardStepLayout footer={footer}>
       {isNewParticipant ? (
         <View style={styles.banner}>
-          <Text style={styles.bannerText}>Nuevo participante — completa el formulario.</Text>
+          <Text style={styles.bannerText}>Nuevo participante: completa el formulario.</Text>
         </View>
       ) : null}
 
@@ -170,7 +173,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
             label="Nombre completo *"
             value={participanteData.nombreCompleto}
             onChangeText={(value) => mergeParticipantData({ nombreCompleto: value })}
-            placeholder="Ej: María García López"
+            placeholder="Ej: Maria Garcia Lopez"
             error={errors.nombreCompleto}
             compact
           />
@@ -190,7 +193,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
       <View style={rowStyle}>
         <View style={styles.fieldCell}>
           <InputField
-            label="Trueques realizados en el año"
+            label="Trueques realizados en el ano"
             value={participanteData.truequesAnio}
             onChangeText={(value) => mergeParticipantData({ truequesAnio: value })}
             keyboardType="numeric"
@@ -201,11 +204,13 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
         {useTwoColumns ? <View style={styles.fieldCell} /> : null}
       </View>
 
-      <Text style={styles.sectionTitle}>Datos de la finca</Text>
+      <Text style={styles.sectionTitle}>
+        {isPreRegistro ? 'Datos de la finca (opcionales)' : 'Datos de la finca'}
+      </Text>
       <View style={rowStyle}>
         <View style={styles.fieldCell}>
           <InputField
-            label="Nombre de la finca *"
+            label={requirePredioData ? 'Nombre de la finca *' : 'Nombre de la finca'}
             value={participanteData.nombreFinca}
             onChangeText={(value) => mergeParticipantData({ nombreFinca: value })}
             error={errors.nombreFinca}
@@ -249,14 +254,16 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Ubicación</Text>
+      <Text style={styles.sectionTitle}>
+        {isPreRegistro ? 'Ubicacion del predio (opcional)' : 'Ubicacion'}
+      </Text>
       <View style={rowStyle}>
         <View style={[styles.fieldCell, styles.fieldGroup]}>
-          <Text style={styles.fieldLabel}>Municipio *</Text>
+          <Text style={styles.fieldLabel}>{requirePredioData ? 'Municipio *' : 'Municipio'}</Text>
           {renderChipGroup(MUNICIPIOS, 'municipio')}
         </View>
         <View style={[styles.fieldCell, styles.fieldGroup]}>
-          <Text style={styles.fieldLabel}>Corregimiento *</Text>
+          <Text style={styles.fieldLabel}>{requirePredioData ? 'Corregimiento *' : 'Corregimiento'}</Text>
           {participanteData.municipio ? (
             renderChipGroup(corregimientos, 'corregimiento')
           ) : (
@@ -266,7 +273,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
       </View>
 
       <InputField
-        label="Vereda *"
+        label={requirePredioData ? 'Vereda *' : 'Vereda'}
         value={participanteData.vereda}
         onChangeText={(value) => mergeParticipantData({ vereda: value })}
         helperText={!participanteData.corregimiento ? 'Selecciona un corregimiento primero' : undefined}
@@ -274,25 +281,33 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
         compact
       />
 
-      <Text style={styles.sectionTitle}>Condiciones del predio</Text>
+      <Text style={styles.sectionTitle}>
+        {isPreRegistro ? 'Condiciones del predio (opcionales)' : 'Condiciones del predio'}
+      </Text>
       <View style={rowStyle}>
         <View style={[styles.fieldCell, styles.fieldGroup]}>
-          <Text style={styles.fieldLabel}>Tipo de suelo *</Text>
+          <Text style={styles.fieldLabel}>{requirePredioData ? 'Tipo de suelo *' : 'Tipo de suelo'}</Text>
           {renderChipGroup(TIPOS_SUELO, 'tipoSuelo')}
         </View>
         <View style={[styles.fieldCell, styles.fieldGroup]}>
-          <Text style={styles.fieldLabel}>Condiciones climáticas *</Text>
+          <Text style={styles.fieldLabel}>
+            {requirePredioData ? 'Condiciones climaticas *' : 'Condiciones climaticas'}
+          </Text>
           {renderChipGroup(CONDICIONES_CLIMATICAS, 'condicionesClimaticas')}
         </View>
       </View>
 
       <View style={rowStyle}>
         <View style={[styles.fieldCell, styles.fieldGroup]}>
-          <Text style={styles.fieldLabel}>Sistemas productivos *</Text>
+          <Text style={styles.fieldLabel}>
+            {requirePredioData ? 'Sistemas productivos *' : 'Sistemas productivos'}
+          </Text>
           {renderChipGroup(SISTEMAS_PRODUCTIVOS, 'sistemasProductivos', true)}
         </View>
         <View style={[styles.fieldCell, styles.fieldGroup]}>
-          <Text style={styles.fieldLabel}>El cultivo es liderado por:</Text>
+          <Text style={styles.fieldLabel}>
+            {requirePredioData ? 'El cultivo es liderado por *' : 'El cultivo es liderado por'}
+          </Text>
           <View style={styles.checkboxGroup}>
             {LIDERAZGO_OPTIONS.map((option) => (
               <CheckboxOption

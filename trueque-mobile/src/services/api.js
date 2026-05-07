@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { normalizeParticipantResponse } from './participantTransforms';
 import { getStoredSession } from './authStorage';
+import { useAuthStore } from '../store/authStore';
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
@@ -8,6 +9,8 @@ export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 12000,
 });
+
+let isClearingInvalidSession = false;
 
 api.interceptors.request.use(async (config) => {
   const session = await getStoredSession();
@@ -19,6 +22,27 @@ api.interceptors.request.use(async (config) => {
 
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const status = error?.response?.status;
+    const requestUrl = error?.config?.url || '';
+    const isAuthRequest = requestUrl.includes('/auth/login');
+
+    if (!isAuthRequest && (status === 401 || status === 403) && !isClearingInvalidSession) {
+      isClearingInvalidSession = true;
+
+      try {
+        await useAuthStore.getState().signOut();
+      } finally {
+        isClearingInvalidSession = false;
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 function normalizePercent(value) {
   if (value === null || value === undefined) {
@@ -122,13 +146,6 @@ export async function saveParticipantRequest(participant, options = {}) {
       }
 
       return api.post('/participants/preregister', payload);
-    },
-    async () => {
-      if (!options.cedula) {
-        throw Object.assign(new Error('skip'), { response: { status: 404 } });
-      }
-
-      return api.put(`/participants/${options.cedula}`, payload);
     },
     async () => api.post('/participants', payload),
   ]);

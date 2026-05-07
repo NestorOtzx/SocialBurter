@@ -15,7 +15,6 @@ import { addContributionsRequest, saveParticipantRequest } from '../../services/
 import { saveCachedParticipantProfile } from '../../services/profileCache';
 import {
   buildParticipantPayload,
-  hasMissingPredioData,
   mapAportesToContributions,
 } from '../../services/participantTransforms';
 import { useAuthStore } from '../../store/authStore';
@@ -29,7 +28,6 @@ export default function RegistrarAportesStep({ tipoRegistro, navigation }) {
   const participantId = useRegistroStore((state) => state.participantId);
   const participanteData = useRegistroStore((state) => state.participanteData);
   const isNewParticipant = useRegistroStore((state) => state.isNewParticipant);
-  const faltanDatosPredio = useRegistroStore((state) => state.faltanDatosPredio);
   const aportes = useRegistroStore((state) => state.aportes);
   const updateAporte = useRegistroStore((state) => state.updateAporte);
   const addAporte = useRegistroStore((state) => state.addAporte);
@@ -88,32 +86,9 @@ export default function RegistrarAportesStep({ tipoRegistro, navigation }) {
         { mode: tipoRegistro }
       );
 
-      if (tipoRegistro === 'diaTrueque' && (faltanDatosPredio || hasMissingPredioData(participanteData))) {
-        Alert.alert(
-          'Aportes registrados',
-          'Faltan datos del predio. ¿Desea completarlos ahora?',
-          [
-            {
-              text: 'Ahora no',
-              onPress: () => markCompleted(),
-            },
-            {
-              text: 'Completar',
-              onPress: () =>
-                navigation.navigate('PreRegistroWizardScreen', {
-                  initialParticipantData: participanteData,
-                  participantId: activeParticipantId,
-                  startStep: 2,
-                  completionOnly: true,
-                }),
-            },
-          ]
-        );
-      } else {
-        markCompleted();
-      }
+      markCompleted();
     } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error de red. Intenta nuevamente.');
+      Alert.alert('Error', 'Ocurrio un error de red. Intenta nuevamente.');
     } finally {
       setSubmitting(false);
     }
@@ -140,10 +115,13 @@ export default function RegistrarAportesStep({ tipoRegistro, navigation }) {
     <WizardStepLayout footer={footer}>
       <View style={styles.participantCard}>
         <View>
-          <Text style={styles.participantName}>{participanteData.nombreCompleto || 'Participante'}</Text>
+          <Text style={styles.participantName}>
+            {participanteData.nombreCompleto || 'Participante'}
+          </Text>
           <Text style={styles.participantCedula}>CC {participanteData.cedula}</Text>
           <Text style={styles.participantMeta}>
-            {participanteData.nombreFinca || 'Finca no registrada'} · {participanteData.municipio || 'Municipio no registrado'}
+            {participanteData.nombreFinca || 'Finca no registrada'} ·{' '}
+            {participanteData.municipio || 'Municipio no registrado'}
           </Text>
         </View>
         <Pressable onPress={() => setStep(2)}>
@@ -151,9 +129,10 @@ export default function RegistrarAportesStep({ tipoRegistro, navigation }) {
         </Pressable>
       </View>
 
-      <Text style={styles.title}>¿Qué trae al trueque?</Text>
+      <Text style={styles.title}>¿Que trae al trueque?</Text>
       <Text style={styles.description}>
-        Registra cada categoría de aporte por separado. Puedes agregar varios. Los aportes se acumulan a los ya registrados.
+        Registra cada categoria de aporte por separado. Puedes agregar varios. Los aportes se
+        acumulan a los ya registrados.
       </Text>
 
       {aportes.map((aporte, index) => (
@@ -167,7 +146,7 @@ export default function RegistrarAportesStep({ tipoRegistro, navigation }) {
             ) : null}
           </View>
 
-          <Text style={styles.label}>Categoría *</Text>
+          <Text style={styles.label}>Categoria *</Text>
           <View style={styles.categoryGroup}>
             {APORTE_CATEGORIES.map((category) => (
               <Chip
@@ -190,7 +169,7 @@ export default function RegistrarAportesStep({ tipoRegistro, navigation }) {
           </View>
 
           <InputField
-            label="Tipo / Especificación *"
+            label="Tipo / Especificacion *"
             value={aporte.tipo}
             onChangeText={(value) => updateAporte(aporte.localId, { tipo: value })}
             placeholder={getCategoryPlaceholder(aporte.categoria)}

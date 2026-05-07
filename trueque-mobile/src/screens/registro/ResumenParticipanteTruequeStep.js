@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import CheckboxOption from '../../components/CheckboxOption';
 import InputField from '../../components/InputField';
 import WizardStepLayout from '../../components/WizardStepLayout';
 import { colors, fonts, shadow, spacing } from '../../constants/theme';
 import { useFormValidator } from '../../hooks/useFormValidator';
 import { saveParticipantRequest } from '../../services/api';
 import { saveCachedParticipantProfile } from '../../services/profileCache';
-import { buildParticipantPayload, hasMissingPredioData } from '../../services/participantTransforms';
+import { buildParticipantPayload } from '../../services/participantTransforms';
 import { useAuthStore } from '../../store/authStore';
 import { useRegistroStore } from '../../store/registroStore';
 
@@ -16,12 +15,11 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
   const { numeric } = useFormValidator();
   const user = useAuthStore((state) => state.user);
   const participanteData = useRegistroStore((state) => state.participanteData);
+  const participantId = useRegistroStore((state) => state.participantId);
   const participantStatus = useRegistroStore((state) => state.participantStatus);
   const mergeParticipantData = useRegistroStore((state) => state.mergeParticipantData);
   const setStep = useRegistroStore((state) => state.setStep);
   const setParticipantId = useRegistroStore((state) => state.setParticipantId);
-  const faltanDatosPredio = useRegistroStore((state) => state.faltanDatosPredio);
-  const setFaltanDatosPredio = useRegistroStore((state) => state.setFaltanDatosPredio);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
@@ -38,21 +36,26 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
 
     try {
       setSaving(true);
-      const saved = await saveParticipantRequest(
-        buildParticipantPayload(participanteData, user?.username, { mode: 'diaTrueque' }),
-        {
-          mode: 'diaTrueque',
-          cedula: participanteData.cedula,
-          basicOnly: true,
-        }
-      );
+      let activeParticipantId = participantId;
 
-      setParticipantId(saved?.id || null);
-      await saveCachedParticipantProfile({ ...participanteData, id: saved?.id || null });
-      setFaltanDatosPredio(faltanDatosPredio || hasMissingPredioData(participanteData));
+      if (!activeParticipantId) {
+        const saved = await saveParticipantRequest(
+          buildParticipantPayload(participanteData, user?.username, { mode: 'diaTrueque' }),
+          {
+            mode: 'diaTrueque',
+            cedula: participanteData.cedula,
+            basicOnly: true,
+          }
+        );
+
+        activeParticipantId = saved?.id || null;
+      }
+
+      setParticipantId(activeParticipantId);
+      await saveCachedParticipantProfile({ ...participanteData, id: activeParticipantId });
       setStep(3);
     } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error de red. Intenta nuevamente.');
+      Alert.alert('Error', 'Ocurrio un error de red. Intenta nuevamente.');
     } finally {
       setSaving(false);
     }
@@ -72,13 +75,13 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
         <View style={styles.warningCard}>
           <Text style={styles.warningTitle}>Participante no registrado</Text>
           <Text style={styles.warningText}>
-            Participante no registrado. Por favor use el módulo de Pre‑registro primero.
+            Participante no registrado. Por favor usa el modulo de pre-registro primero.
           </Text>
           <Pressable
             style={styles.primaryLinkButton}
             onPress={() => navigation.navigate('PreRegistroWizardScreen')}
           >
-            <Text style={styles.primaryLinkButtonText}>Ir al Pre‑registro</Text>
+            <Text style={styles.primaryLinkButtonText}>Ir al pre-registro</Text>
           </Pressable>
         </View>
       </WizardStepLayout>
@@ -96,7 +99,7 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
         disabled={saving}
       >
         <Text style={styles.primaryButtonText}>
-          {saving ? 'Guardando...' : 'Continuar a aportes →'}
+          {saving ? 'Guardando...' : 'Continuar a aportes ->'}
         </Text>
       </Pressable>
     </View>
@@ -106,7 +109,7 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
     <WizardStepLayout footer={footer}>
       <View style={styles.infoBanner}>
         <Text style={styles.infoBannerText}>
-          Los datos del predio no son necesarios hoy, pueden completarse después.
+          Si faltan datos de la finca o del predio, podras completarlos despues en pre-registro.
         </Text>
       </View>
 
@@ -122,7 +125,7 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
         <Text style={styles.summaryText}>Municipio: {participanteData.municipio || 'Sin registrar'}</Text>
       </View>
 
-      <Text style={styles.sectionTitle}>Edición rápida</Text>
+      <Text style={styles.sectionTitle}>Edicion rapida</Text>
       <InputField
         label="Celular"
         value={participanteData.celular}
@@ -138,15 +141,6 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
         onChangeText={(value) => mergeParticipantData({ nombreFinca: value })}
         compact
       />
-
-      <View style={styles.checkboxWrap}>
-        <CheckboxOption
-          label="Falta información del predio"
-          selected={faltanDatosPredio}
-          compact
-          onPress={() => setFaltanDatosPredio(!faltanDatosPredio)}
-        />
-      </View>
     </WizardStepLayout>
   );
 }
@@ -199,9 +193,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontFamily: fonts.semibold,
     marginBottom: 8,
-  },
-  checkboxWrap: {
-    marginTop: spacing.sm,
   },
   footerButtons: {
     flexDirection: 'row',
