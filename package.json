@@ -13,8 +13,13 @@
     "devinstall": "npm run install:mobile && npm run install:backend",
 
     "build:mobile": "npm --prefix trueque-mobile run build",
+    "build:backend": "npm --prefix trueque-backend run build",
+
+    "build": "npm run build:mobile && npm run build:backend",
+
     "start:backend": "npm --prefix trueque-backend run start"
-  },
+  }
+  ,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NestorOtzx/SocialBurter.git"
