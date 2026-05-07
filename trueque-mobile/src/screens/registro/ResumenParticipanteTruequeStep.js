@@ -125,7 +125,7 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
         <Text style={styles.summaryText}>Municipio: {participanteData.municipio || 'Sin registrar'}</Text>
       </View>
 
-      <Text style={styles.sectionTitle}>Edicion rapida</Text>
+      <Text style={styles.sectionTitle}>Ediciónrapida</Text>
       <InputField
         label="Celular"
         value={participanteData.celular}

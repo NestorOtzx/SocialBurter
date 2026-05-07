@@ -193,12 +193,12 @@
         <p>Hoy el puntaje solo usa diversidad y volumen.</p>
       </article>
       <article class="card">
-        <h2>Configuracion visible</h2>
+        <h2>Configuraciónvisible</h2>
         <p>La app permite ajustar 4 pesos, pero 2 de ellos aun no participan en el ranking.</p>
       </article>
       <article class="card">
         <h2>Riesgo principal</h2>
-        <p>El volumen tiende a dominar el score porque no hay normalizacion entre criterios.</p>
+        <p>El volumen tiende a dominar el score porque no hay normalizaciónentre criterios.</p>
       </article>
     </section>
 
@@ -206,7 +206,7 @@
       <h3>1. Como se calcula hoy</h3>
       <p>
         El endpoint principal es <code>GET /ranking?eventYear=YYYY</code>. Para ese ano,
-        el backend busca una regla de configuracion en <code>event_rules</code>, agrupa los aportes
+        el backend busca una regla de configuraciónen <code>event_rules</code>, agrupa los aportes
         por participante y calcula dos metricas:
       </p>
       <ul>
@@ -232,7 +232,7 @@
       <ul>
         <li>La cantidad de variedades distintas registradas en <code>pr.variety</code>.</li>
         <li>La suma de cantidades registradas en <code>pr.quantity</code>.</li>
-        <li>El ano del aporte, filtrado por <code>pr.event_year</code>.</li>
+        <li>El año del aporte, filtrado por <code>pr.event_year</code>.</li>
         <li>La regla de desempate guardada para ese ano.</li>
       </ul>
       <div class="note">
@@ -245,7 +245,7 @@
     <section>
       <h3>3. Que no afecta hoy el ranking</h3>
       <p>
-        Aunque la configuracion de la app presenta cuatro criterios, el backend actual no usa
+        Aunque la configuraciónde la app presenta cuatro criterios, el backend actual no usa
         estas variables dentro del puntaje:
       </p>
       <ul>
@@ -309,13 +309,13 @@ score = 26</pre>
       <h3>6. Diferencia entre la UI y la logica real</h3>
       <p>Hoy existe una brecha clara entre lo que la app comunica y lo que realmente sucede:</p>
       <ul>
-        <li>La pantalla de configuracion permite editar cuatro pesos: diversidad, volumen, practicas y liderazgo.</li>
+        <li>La pantalla de configuraciónpermite editar cuatro pesos: diversidad, volumen, practicas y liderazgo.</li>
         <li>La formula del backend solo usa diversidad y volumen.</li>
         <li>La UI permite elegir cuatro criterios de desempate.</li>
         <li>El backend solo soporta diversidad o volumen.</li>
       </ul>
       <div class="note">
-        En la practica, la configuracion actual puede inducir a error al equipo operativo,
+        En la practica, la configuraciónactual puede inducir a error al equipo operativo,
         porque da a entender que practicas y liderazgo ya hacen parte del ranking cuando aun no es asi.
       </div>
     </section>
@@ -326,7 +326,7 @@ score = 26</pre>
       <ul>
         <li>Muestra nombre, cedula, diversidad, volumen y puntaje.</li>
         <li>No muestra practicas ni liderazgo.</li>
-        <li>La posicion se deriva del orden ya calculado por el backend.</li>
+        <li>La posiciónse deriva del orden ya calculado por el backend.</li>
       </ul>
     </section>
 
@@ -357,8 +357,8 @@ score = 26</pre>
         <li>La pantalla historica actual no muestra ranking historico, sino contribuciones historicas.</li>
       </ul>
       <p class="foot">
-        Recomendacion: o bien se simplifica la UI de configuracion para que refleje el ranking actual,
-        o bien se completa la implementacion del backend para incorporar practicas, liderazgo
+        Recomendacion: o bien se simplifica la UI de configuraciónpara que refleje el ranking actual,
+        o bien se completa la implementacióndel backend para incorporar practicas, liderazgo
         y sus desempates de forma coherente.
       </p>
     </section>

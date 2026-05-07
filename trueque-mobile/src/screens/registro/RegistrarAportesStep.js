@@ -169,7 +169,7 @@ export default function RegistrarAportesStep({ tipoRegistro, navigation }) {
           </View>
 
           <InputField
-            label="Tipo / Especificacion *"
+            label="Tipo / Especificación*"
             value={aporte.tipo}
             onChangeText={(value) => updateAporte(aporte.localId, { tipo: value })}
             placeholder={getCategoryPlaceholder(aporte.categoria)}

@@ -255,7 +255,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
       </View>
 
       <Text style={styles.sectionTitle}>
-        {isPreRegistro ? 'Ubicacion del predio (opcional)' : 'Ubicacion'}
+        {isPreRegistro ? 'Ubicacióndel predio (opcional)' : 'Ubicacion'}
       </Text>
       <View style={rowStyle}>
         <View style={[styles.fieldCell, styles.fieldGroup]}>

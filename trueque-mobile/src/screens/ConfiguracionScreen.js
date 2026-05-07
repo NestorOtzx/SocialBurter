@@ -30,7 +30,7 @@ const CRITERION_DETAILS = [
     key: 'practicas',
     title: 'Practicas sostenibles',
     description:
-      'Aplica cuando la produccion es agroecologica, silvopastoril o con practicas ancestrales.',
+      'Aplica cuando la producciónes agroecologica, silvopastoril o con practicas ancestrales.',
   },
   {
     key: 'liderazgo',
@@ -75,7 +75,7 @@ export default function ConfiguracionScreen({ navigation }) {
 
   const handleSave = async () => {
     if (!/^\d{4}$/.test(year)) {
-      Alert.alert('Validacion', 'Ingresa un ano valido de 4 digitos.');
+      Alert.alert('Validacion', 'Ingresa un año valido de 4 digitos.');
       return;
     }
 
@@ -91,7 +91,7 @@ export default function ConfiguracionScreen({ navigation }) {
         pesos: weights,
         tieBreaker: desempate,
       });
-      Alert.alert('Exito', 'Configuracion guardada correctamente.');
+      Alert.alert('Exito', 'Configuraciónguardada correctamente.');
     } catch (error) {
       Alert.alert('Error', 'Ocurrio un error de red. Intenta nuevamente.');
     } finally {
@@ -103,7 +103,7 @@ export default function ConfiguracionScreen({ navigation }) {
     <View style={styles.safeArea}>
       <AppHeader title="Configurar Reglas" showBack navigation={navigation} />
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Parametrizacion anual</Text>
+        <Text style={styles.title}>Parametrizaciónanual</Text>
         <View style={styles.divider} />
 
         <Text style={styles.subtitle}>Reglas de ranking</Text>
@@ -121,7 +121,7 @@ export default function ConfiguracionScreen({ navigation }) {
 
         <Text style={styles.sectionTitle}>Pesos de criterios</Text>
         <Text style={styles.inlineHelper}>
-          No hay redistribucion automatica. Debes completar manualmente el total hasta llegar a 100%.
+          No hay redistribuciónautomatica. Debes completar manualmente el total hasta llegar a 100%.
         </Text>
 
         <SegmentedPercentageEditor
