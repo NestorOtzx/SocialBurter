@@ -1,0 +1,27 @@
+{
+  "name": "socialburter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "mobile": "cd trueque-mobile && npm run web",
+    "backend": "cd trueque-backend && npm run dev",
+    "dev": "concurrently \"npm run mobile\" \"npm run backend\""
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NestorOtzx/SocialBurter.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/NestorOtzx/SocialBurter/issues"
+  },
+  "homepage": "https://github.com/NestorOtzx/SocialBurter#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
