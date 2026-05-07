@@ -17,7 +17,8 @@
 
     "build": "npm run build:mobile && npm run build:backend",
 
-    "start:backend": "npm --prefix trueque-backend run start"
+    "start:backend": "npm --prefix trueque-backend run start",
+    "start:mobile": "npm --prefix trueque-mobile run start"
   }
   ,
   "repository": {
