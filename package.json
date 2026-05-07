@@ -6,7 +6,8 @@
   "scripts": {
     "mobile": "cd trueque-mobile && npm run web",
     "backend": "cd trueque-backend && npm run dev",
-    "dev": "concurrently \"npm run mobile\" \"npm run backend\""
+    "dev": "concurrently \"npm run mobile\" \"npm run backend\"",
+    "devinstall": "concurrently \"cd trueque-mobile && npm install\" \"cd trueque-backend && npm install\""
   },
 
   "repository": {
