@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Dimensions, ImageBackground, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Alert, Dimensions, ImageBackground, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import InputField from '../components/InputField';
 import { colors, fonts, spacing } from '../constants/theme';
@@ -12,6 +12,7 @@ export default function LoginScreen() {
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleLogin = async () => {
     if (!usuario.trim() || !password.trim()) {
@@ -65,9 +66,14 @@ export default function LoginScreen() {
 
       {/* Formulario flotante */}
       <KeyboardAvoidingView
-        behavior={Platform.select({ ios: 'padding', android: undefined })}
+        behavior={Platform.select({ ios: 'padding', android: 'padding' })}
         style={styles.content}
       >
+        <ScrollView
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + spacing.xl }]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
         <View style={styles.formCard}>
           <Text style={styles.title}>Inicio de sesión</Text>
           <InputField
@@ -88,6 +94,7 @@ export default function LoginScreen() {
           </Pressable>
           <Text style={styles.footer}>Versión 1.0.0</Text>
         </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </ImageBackground>
   );
@@ -138,6 +145,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: spacing.xl,
