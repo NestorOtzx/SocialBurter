@@ -193,7 +193,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
       <View style={rowStyle}>
         <View style={styles.fieldCell}>
           <InputField
-            label="Trueques realizados en el ano"
+            label="Trueques realizados en el año"
             value={participanteData.truequesAnio}
             onChangeText={(value) => mergeParticipantData({ truequesAnio: value })}
             keyboardType="numeric"
