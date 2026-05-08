@@ -205,7 +205,7 @@
     <section>
       <h3>1. Como se calcula hoy</h3>
       <p>
-        El endpoint principal es <code>GET /ranking?eventYear=YYYY</code>. Para ese ano,
+        El endpoint principal es <code>GET /ranking?eventYear=YYYY</code>. Para ese año,
         el backend busca una regla de configuraciónen <code>event_rules</code>, agrupa los aportes
         por participante y calcula dos metricas:
       </p>
@@ -216,7 +216,7 @@
       <p>La formula real del puntaje es:</p>
       <pre>score = diversity * diversityWeight + volume * volumeWeight</pre>
       <p>
-        Si no existe una regla guardada para ese ano, el backend usa valores por defecto:
+        Si no existe una regla guardada para ese año, el backend usa valores por defecto:
       </p>
       <ul>
         <li><code>diversityWeight = 1</code></li>
@@ -233,7 +233,7 @@
         <li>La cantidad de variedades distintas registradas en <code>pr.variety</code>.</li>
         <li>La suma de cantidades registradas en <code>pr.quantity</code>.</li>
         <li>El año del aporte, filtrado por <code>pr.event_year</code>.</li>
-        <li>La regla de desempate guardada para ese ano.</li>
+        <li>La regla de desempate guardada para eseaño.</li>
       </ul>
       <div class="note">
         La diversidad se calcula con un <code>COUNT(DISTINCT LOWER(TRIM(pr.variety)))</code>.
