@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppHeader from '../../components/AppHeader';
 import Stepper from '../../components/Stepper';
 import { REGISTRO_STEPS, REGISTRO_TITLES } from '../../constants/options';
@@ -12,6 +13,7 @@ import RegistrarAportesStep from './RegistrarAportesStep';
 import ResumenParticipanteTruequeStep from './ResumenParticipanteTruequeStep';
 
 export default function RegistroWizard({ navigation, route, tipoRegistro = 'pre' }) {
+  const insets = useSafeAreaInsets();
   const step = useRegistroStore((state) => state.step);
   const completed = useRegistroStore((state) => state.completed);
   const startFlow = useRegistroStore((state) => state.startFlow);
@@ -55,7 +57,7 @@ export default function RegistroWizard({ navigation, route, tipoRegistro = 'pre'
   const renderCurrentStep = () => {
     if (completed) {
       return (
-        <View style={styles.successContainer}>
+        <View style={[styles.successContainer, { paddingBottom: insets.bottom + spacing.xl }]}>
           <Text style={styles.successTitle}>Registro completado</Text>
           <Text style={styles.successDescription}>{successDescription}</Text>
 
