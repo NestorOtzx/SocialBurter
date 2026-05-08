@@ -1,8 +1,11 @@
 import React from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '../constants/theme';
 
 export default function WizardStepLayout({ children, footer = null, contentStyle = null }) {
+  const insets = useSafeAreaInsets();
+
   return (
     <View style={styles.wrapper}>
       <ScrollView
@@ -14,7 +17,11 @@ export default function WizardStepLayout({ children, footer = null, contentStyle
       >
         {children}
       </ScrollView>
-      {footer ? <View style={styles.footer}>{footer}</View> : null}
+      {footer ? (
+        <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.sm }]}>
+          {footer}
+        </View>
+      ) : null}
     </View>
   );
 }
