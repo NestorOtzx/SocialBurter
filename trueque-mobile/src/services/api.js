@@ -1,7 +1,9 @@
 import axios from 'axios';
+import NetInfo from '@react-native-community/netinfo';
 import { normalizeParticipantResponse } from './participantTransforms';
 import { getStoredSession } from './authStorage';
 import { useAuthStore } from '../store/authStore';
+import { saveOfflineParticipant, saveOfflineContributions } from './localDb';
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
@@ -139,6 +141,14 @@ export async function saveParticipantRequest(participant, options = {}) {
     basicOnly: Boolean(options.basicOnly),
   };
 
+  const netInfo = await NetInfo.fetch();
+  if (!netInfo.isConnected) {
+    // Offline Mode
+    await saveOfflineParticipant(payload);
+    // Return mock response so UI continues
+    return normalizeParticipantResponse(participant);
+  }
+
   const response = await tryRequest([
     async () => {
       if (options.mode !== 'pre') {
@@ -154,13 +164,24 @@ export async function saveParticipantRequest(participant, options = {}) {
 }
 
 export async function addContributionsRequest(participantId, eventYear, contributions, options = {}) {
-  const response = await api.post(`/participants/${participantId}/contributions`, {
+  const payload = {
     eventYear,
     year: eventYear,
     contributions,
     aportes: contributions,
     tipoRegistro: options.mode || 'pre',
-  });
+  };
+
+  const netInfo = await NetInfo.fetch();
+  if (!netInfo.isConnected) {
+    // Participant ID might not be valid offline (if just created), use cedula if passed in options
+    const cedula = options.cedula; 
+    if (!cedula) throw new Error("Cedula is required for offline contribution saving");
+    await saveOfflineContributions(cedula, eventYear, payload);
+    return { success: true, offline: true };
+  }
+
+  const response = await api.post(`/participants/${participantId}/contributions`, payload);
 
   return response.data;
 }
@@ -211,5 +232,10 @@ export async function saveConfigurationRequest(payload) {
     tieBreaker: payload.tieBreaker,
   });
 
+  return response.data;
+}
+
+export async function deleteParticipantRequest(cedula) {
+  const response = await api.delete(`/participants/${cedula}`);
   return response.data;
 }

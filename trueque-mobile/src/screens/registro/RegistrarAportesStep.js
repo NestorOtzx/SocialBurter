@@ -83,7 +83,7 @@ export default function RegistrarAportesStep({ tipoRegistro, navigation }) {
         activeParticipantId,
         CURRENT_YEAR,
         mapAportesToContributions(aportes, CURRENT_YEAR),
-        { mode: tipoRegistro }
+        { mode: tipoRegistro, cedula: participanteData.cedula }
       );
 
       markCompleted();
