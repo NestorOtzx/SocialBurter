@@ -6,6 +6,7 @@ import {
   getContributions,
   listParticipants,
   listContributions,
+  deleteParticipant,
 } from '../controllers/participantController';
 import { verifyToken } from '../middleware/auth';
 
@@ -18,5 +19,6 @@ router.get('/', verifyToken, listParticipants);
 router.post('/', verifyToken, upsertParticipant);
 router.post('/:id/contributions', verifyToken, addContributions);
 router.get('/:id/contributions', verifyToken, getContributions);
+router.delete('/:cedula', verifyToken, deleteParticipant);
 
 export default router;

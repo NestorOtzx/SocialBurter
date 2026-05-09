@@ -371,3 +371,28 @@ export async function listContributions(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to list contributions' });
   }
 }
+
+export async function deleteParticipant(req: Request, res: Response) {
+  try {
+    const { cedula } = req.params;
+
+    if (!cedula) {
+      return res.status(400).json({ error: 'cedula is required' });
+    }
+
+    // Check if participant exists
+    const participant = await dbGet('SELECT id FROM participants WHERE cedula = ?', [String(cedula)]);
+    
+    if (!participant) {
+      return res.status(404).json({ error: 'Participant not found' });
+    }
+
+    // SQLite ON DELETE CASCADE will handle deleting related product_records
+    await dbRun('DELETE FROM participants WHERE cedula = ?', [String(cedula)]);
+
+    res.json({ message: 'Participant and their contributions deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting participant:', error);
+    res.status(500).json({ error: 'Failed to delete participant' });
+  }
+}

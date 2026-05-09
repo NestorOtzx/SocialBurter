@@ -13,7 +13,8 @@ import {
 } from '../constants/options';
 import { colors, fonts, shadow, spacing } from '../constants/theme';
 import { useDebounce } from '../hooks/useDebounce';
-import { fetchHistoricalContributionsRequest } from '../services/api';
+import { fetchHistoricalContributionsRequest, deleteParticipantRequest } from '../services/api';
+import NetInfo from '@react-native-community/netinfo';
 import {
   getContributionDisplayQuantity,
   getContributionDisplayType,
@@ -47,9 +48,48 @@ export default function HistoricoScreen({ navigation }) {
   const [items, setItems] = useState([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
 
   const debouncedCedula = useDebounce(cedula, 450);
   const debouncedNombre = useDebounce(nombre, 450);
+
+  useEffect(() => {
+    NetInfo.fetch().then(state => setIsOffline(!state.isConnected));
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsOffline(!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleDeleteParticipant = (targetCedula) => {
+    if (isOffline) {
+      Alert.alert('Error', 'Necesitas conexión a internet para eliminar registros.');
+      return;
+    }
+    Alert.alert(
+      'Eliminar Participante',
+      `¿Estás seguro que deseas eliminar TODO el historial del participante con cédula ${targetCedula}? Esta acción no se puede deshacer.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Eliminar', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await deleteParticipantRequest(targetCedula);
+              Alert.alert('Éxito', 'Participante eliminado correctamente.');
+              loadItems(selectedYear); // reload
+            } catch (error) {
+              Alert.alert('Error', 'No se pudo eliminar el participante.');
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
 
   const loadItems = async (year) => {
     try {
@@ -214,6 +254,15 @@ export default function HistoricoScreen({ navigation }) {
               <Text style={styles.cardDetail}>Municipio: {item.municipality}</Text>
               <Text style={styles.cardDetail}>Vereda: {item.village}</Text>
               <Text style={styles.cardDetail}>Fecha: {formatHistoricDate(item.registeredAt)}</Text>
+              
+              {!isOffline && (
+                <Pressable 
+                  style={{ marginTop: 12, padding: 8, backgroundColor: colors.warningText, borderRadius: 8, alignItems: 'center' }}
+                  onPress={() => handleDeleteParticipant(item.participantCedula)}
+                >
+                  <Text style={{ color: '#fff', fontSize: 12, fontFamily: fonts.semibold }}>Eliminar Participante</Text>
+                </Pressable>
+              )}
             </View>
           );
         }}
