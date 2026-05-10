@@ -6,7 +6,7 @@ import InputField from '../components/InputField';
 import { colors, fonts, spacing } from '../constants/theme';
 import { loginRequest } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import * as Network from 'expo-network';
+import { useNetworkStore } from '../store/networkStore';
 
 export default function LoginScreen() {
   const signIn = useAuthStore((state) => state.signIn);
@@ -14,17 +14,8 @@ export default function LoginScreen() {
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
+  const isOffline = useNetworkStore(state => state.isOffline);
   const insets = useSafeAreaInsets();
-
-  React.useEffect(() => {
-    Network.getNetworkStateAsync()
-      .then(state => setIsOffline(!state.isConnected))
-      .catch(err => {
-        console.error("Error getting network state in LoginScreen", err);
-        setIsOffline(true);
-      });
-  }, []);
 
   const handleLogin = async () => {
     if (!usuario.trim() || !password.trim()) {
