@@ -18,7 +18,12 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
 
   React.useEffect(() => {
-    Network.getNetworkStateAsync().then(state => setIsOffline(!state.isConnected));
+    Network.getNetworkStateAsync()
+      .then(state => setIsOffline(!state.isConnected))
+      .catch(err => {
+        console.error("Error getting network state in LoginScreen", err);
+        setIsOffline(true);
+      });
   }, []);
 
   const handleLogin = async () => {

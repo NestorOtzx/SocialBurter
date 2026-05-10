@@ -14,7 +14,7 @@ import {
 import { colors, fonts, shadow, spacing } from '../constants/theme';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchHistoricalContributionsRequest, deleteParticipantRequest } from '../services/api';
-import * as Network from 'expo-network';
+import { useNetworkStore } from '../store/networkStore';
 import {
   getContributionDisplayQuantity,
   getContributionDisplayType,
@@ -48,28 +48,10 @@ export default function HistoricoScreen({ navigation }) {
   const [items, setItems] = useState([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
+  const isOffline = useNetworkStore(state => state.isOffline);
 
   const debouncedCedula = useDebounce(cedula, 450);
   const debouncedNombre = useDebounce(nombre, 450);
-
-  useEffect(() => {
-    let isMounted = true;
-    const checkNetwork = async () => {
-      try {
-        const state = await Network.getNetworkStateAsync();
-        if (isMounted) setIsOffline(!state.isConnected);
-      } catch (error) {
-        console.error("Error checking network state in Historico", error);
-      }
-    };
-    checkNetwork();
-    const intervalId = setInterval(checkNetwork, 5000);
-    return () => {
-      isMounted = false;
-      clearInterval(intervalId);
-    };
-  }, []);
 
   const handleDeleteParticipant = (targetCedula) => {
     if (isOffline) {

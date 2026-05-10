@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import * as Network from 'expo-network';
 import { 
   getPendingParticipants, 
@@ -9,10 +9,13 @@ import {
 } from '../services/localDb';
 import { api, API_BASE_URL } from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import { useNetworkStore } from '../store/networkStore';
 
 export const useNetworkSync = () => {
-  const [isOffline, setIsOffline] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const isOffline = useNetworkStore(state => state.isOffline);
+  const setIsOffline = useNetworkStore(state => state.setOffline);
+  const isSyncing = useNetworkStore(state => state.isSyncing);
+  const setIsSyncing = useNetworkStore(state => state.setSyncing);
   const token = useAuthStore(state => state.token);
 
   // Sync function
@@ -71,6 +74,11 @@ export const useNetworkSync = () => {
     }
   }, [isOffline, isSyncing]);
 
+  const syncDataRef = useRef(syncData);
+  useEffect(() => {
+    syncDataRef.current = syncData;
+  }, [syncData]);
+
   useEffect(() => {
     let isMounted = true;
     let intervalId;
@@ -82,16 +90,15 @@ export const useNetworkSync = () => {
         
         const offline = !state.isConnected;
         
-        setIsOffline((prevOffline) => {
-          if (prevOffline !== offline) {
-             // If we just came online, trigger sync
+        if (isMounted) {
+          const wasOffline = useNetworkStore.getState().isOffline;
+          if (wasOffline !== offline) {
+            setIsOffline(offline);
             if (!offline) {
-              syncData();
+              syncDataRef.current();
             }
-            return offline;
           }
-          return prevOffline;
-        });
+        }
       } catch (error) {
         console.error("Error checking network state", error);
       }
@@ -104,7 +111,7 @@ export const useNetworkSync = () => {
       isMounted = false;
       clearInterval(intervalId);
     };
-  }, [syncData, token]);
+  }, []);
 
   return { isOffline, isSyncing, syncData, isOfflineMode: token === 'OFFLINE_MODE' };
 };
