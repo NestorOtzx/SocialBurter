@@ -1,5 +1,5 @@
 import axios from 'axios';
-import NetInfo from '@react-native-community/netinfo';
+import * as Network from 'expo-network';
 import { normalizeParticipantResponse } from './participantTransforms';
 import { getStoredSession } from './authStorage';
 import { useAuthStore } from '../store/authStore';
@@ -141,7 +141,7 @@ export async function saveParticipantRequest(participant, options = {}) {
     basicOnly: Boolean(options.basicOnly),
   };
 
-  const netInfo = await NetInfo.fetch();
+  const netInfo = await Network.getNetworkStateAsync();
   if (!netInfo.isConnected) {
     // Offline Mode
     await saveOfflineParticipant(payload);
@@ -172,7 +172,7 @@ export async function addContributionsRequest(participantId, eventYear, contribu
     tipoRegistro: options.mode || 'pre',
   };
 
-  const netInfo = await NetInfo.fetch();
+  const netInfo = await Network.getNetworkStateAsync();
   if (!netInfo.isConnected) {
     // Participant ID might not be valid offline (if just created), use cedula if passed in options
     const cedula = options.cedula; 

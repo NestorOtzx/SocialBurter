@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import NetInfo from '@react-native-community/netinfo';
+import * as Network from 'expo-network';
 import { 
   getPendingParticipants, 
   getPendingContributions, 
@@ -70,23 +70,38 @@ export const useNetworkSync = () => {
   }, [isOffline, isSyncing]);
 
   useEffect(() => {
-    // Check initial status
-    NetInfo.fetch().then(state => {
-      setIsOffline(!state.isConnected);
-    });
+    let isMounted = true;
+    let intervalId;
 
-    // Subscribe to changes
-    const unsubscribe = NetInfo.addEventListener(state => {
-      const offline = !state.isConnected;
-      setIsOffline(offline);
-      
-      // If we just came online, trigger sync
-      if (!offline) {
-        syncData();
+    const checkNetwork = async () => {
+      try {
+        const state = await Network.getNetworkStateAsync();
+        if (!isMounted) return;
+        
+        const offline = !state.isConnected;
+        
+        setIsOffline((prevOffline) => {
+          if (prevOffline !== offline) {
+             // If we just came online, trigger sync
+            if (!offline) {
+              syncData();
+            }
+            return offline;
+          }
+          return prevOffline;
+        });
+      } catch (error) {
+        console.error("Error checking network state", error);
       }
-    });
+    };
 
-    return () => unsubscribe();
+    checkNetwork();
+    intervalId = setInterval(checkNetwork, 5000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, [syncData]);
 
   return { isOffline, isSyncing, syncData };

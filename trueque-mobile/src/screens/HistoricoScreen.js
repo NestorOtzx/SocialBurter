@@ -14,7 +14,7 @@ import {
 import { colors, fonts, shadow, spacing } from '../constants/theme';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchHistoricalContributionsRequest, deleteParticipantRequest } from '../services/api';
-import NetInfo from '@react-native-community/netinfo';
+import * as Network from 'expo-network';
 import {
   getContributionDisplayQuantity,
   getContributionDisplayType,
@@ -54,11 +54,21 @@ export default function HistoricoScreen({ navigation }) {
   const debouncedNombre = useDebounce(nombre, 450);
 
   useEffect(() => {
-    NetInfo.fetch().then(state => setIsOffline(!state.isConnected));
-    const unsubscribe = NetInfo.addEventListener(state => {
-      setIsOffline(!state.isConnected);
-    });
-    return () => unsubscribe();
+    let isMounted = true;
+    const checkNetwork = async () => {
+      try {
+        const state = await Network.getNetworkStateAsync();
+        if (isMounted) setIsOffline(!state.isConnected);
+      } catch (error) {
+        console.error("Error checking network state in Historico", error);
+      }
+    };
+    checkNetwork();
+    const intervalId = setInterval(checkNetwork, 5000);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleDeleteParticipant = (targetCedula) => {
