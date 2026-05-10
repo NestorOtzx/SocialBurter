@@ -8,6 +8,7 @@ import { colors } from './src/constants/theme';
 import { useAuthStore } from './src/store/authStore';
 import { initLocalDb } from './src/services/localDb';
 import { useNetworkSync } from './src/hooks/useNetworkSync';
+import OfflineLoginModal from './src/components/OfflineLoginModal';
 
 // Fix scroll on Expo Web: allow body to scroll naturally
 if (Platform.OS === 'web' && typeof document !== 'undefined') {
@@ -39,7 +40,7 @@ export default function App() {
     initLocalDb().catch(console.error);
   }, [hydrateSession]);
 
-  const { isOffline, isSyncing } = useNetworkSync();
+  const { isOffline, isSyncing, isOfflineMode } = useNetworkSync();
 
   if (!fontsLoaded || isBootstrapping) {
     return (
@@ -69,6 +70,7 @@ export default function App() {
           </Text>
         </View>
       )}
+      <OfflineLoginModal visible={!isOffline && isOfflineMode} />
       <AppNavigator />
     </SafeAreaProvider>
   );

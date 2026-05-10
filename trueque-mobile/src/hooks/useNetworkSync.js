@@ -8,14 +8,16 @@ import {
   clearSyncedData 
 } from '../services/localDb';
 import { api, API_BASE_URL } from '../services/api';
+import { useAuthStore } from '../store/authStore';
 
 export const useNetworkSync = () => {
   const [isOffline, setIsOffline] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const token = useAuthStore(state => state.token);
 
   // Sync function
   const syncData = useCallback(async () => {
-    if (isSyncing || isOffline) return;
+    if (isSyncing || isOffline || token === 'OFFLINE_MODE') return;
     setIsSyncing(true);
 
     try {
@@ -102,7 +104,7 @@ export const useNetworkSync = () => {
       isMounted = false;
       clearInterval(intervalId);
     };
-  }, [syncData]);
+  }, [syncData, token]);
 
-  return { isOffline, isSyncing, syncData };
+  return { isOffline, isSyncing, syncData, isOfflineMode: token === 'OFFLINE_MODE' };
 };

@@ -6,13 +6,20 @@ import InputField from '../components/InputField';
 import { colors, fonts, spacing } from '../constants/theme';
 import { loginRequest } from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import * as Network from 'expo-network';
 
 export default function LoginScreen() {
   const signIn = useAuthStore((state) => state.signIn);
+  const enterOfflineMode = useAuthStore((state) => state.enterOfflineMode);
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
   const insets = useSafeAreaInsets();
+
+  React.useEffect(() => {
+    Network.getNetworkStateAsync().then(state => setIsOffline(!state.isConnected));
+  }, []);
 
   const handleLogin = async () => {
     if (!usuario.trim() || !password.trim()) {
@@ -92,6 +99,16 @@ export default function LoginScreen() {
           <Pressable style={[styles.button, loading && styles.buttonDisabled]} onPress={handleLogin} disabled={loading}>
             <Text style={styles.buttonText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text>
           </Pressable>
+
+          {isOffline && (
+            <Pressable 
+              style={[styles.button, { backgroundColor: colors.warningText, marginTop: spacing.md }]} 
+              onPress={() => enterOfflineMode()}
+            >
+              <Text style={styles.buttonText}>Ingresar en Modo Offline</Text>
+            </Pressable>
+          )}
+
           <Text style={styles.footer}>Versión 1.0.0</Text>
         </View>
         </ScrollView>

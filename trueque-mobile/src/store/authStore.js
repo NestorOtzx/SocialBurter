@@ -25,6 +25,13 @@ export const useAuthStore = create((set) => ({
       isBootstrapping: false,
     });
   },
+  enterOfflineMode: () => {
+    set({
+      token: 'OFFLINE_MODE',
+      user: { username: 'Modo Offline', role: 'monitor' },
+      isBootstrapping: false,
+    });
+  },
   signOut: async () => {
     await clearStoredSession();
     set({ token: null, user: null, isBootstrapping: false });
