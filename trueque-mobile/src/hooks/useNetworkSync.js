@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
+import { AppState } from 'react-native';
 import * as Network from 'expo-network';
 import { 
   getPendingParticipants, 
@@ -78,6 +79,29 @@ export const useNetworkSync = () => {
   useEffect(() => {
     syncDataRef.current = syncData;
   }, [syncData]);
+
+  // Trigger sync automatically when the user successfully logs in after being offline
+  useEffect(() => {
+    if (token && token !== 'OFFLINE_MODE' && !isOffline) {
+      syncDataRef.current();
+    }
+  }, [token, isOffline]);
+
+  // Trigger sync when app comes to foreground
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (nextAppState === 'active' && !useNetworkStore.getState().isOffline) {
+        const currentToken = useAuthStore.getState().token;
+        if (currentToken && currentToken !== 'OFFLINE_MODE') {
+          syncDataRef.current();
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;

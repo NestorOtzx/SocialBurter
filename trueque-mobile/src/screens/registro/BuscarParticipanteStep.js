@@ -11,6 +11,7 @@ import {
   mergeParticipantProfile,
 } from '../../services/participantTransforms';
 import { useRegistroStore } from '../../store/registroStore';
+import { useNetworkStore } from '../../store/networkStore';
 
 export default function BuscarParticipanteStep({ tipoRegistro }) {
   const participanteData = useRegistroStore((state) => state.participanteData);
@@ -51,9 +52,35 @@ export default function BuscarParticipanteStep({ tipoRegistro }) {
           faltanDatosPredio: hasMissingPredioData(mergedProfile),
         });
       } catch (error) {
-        if (error?.response?.status === 404) {
+        const isOfflineState = useNetworkStore.getState().isOffline;
+        
+        if (error?.response?.status === 404 || isOfflineState) {
           if (tipoRegistro === 'diaTrueque') {
-            setParticipantNotFound(cedula);
+            if (error?.response?.status !== 404 && isOfflineState) {
+              Alert.alert(
+                'Modo Offline',
+                'No se pudo conectar al servidor para verificar la cédula. ¿Deseas hacer un registro rápido local para guardar sus aportes?',
+                [
+                  {
+                    text: 'Continuar Offline',
+                    onPress: () => {
+                      const newParticipant = createBlankParticipant(cedula);
+                      setParticipantSearchResult({
+                        participanteData: newParticipant,
+                        originalParticipantData: newParticipant,
+                        participantId: null,
+                        participantStatus: 'offline_bypass',
+                        isNewParticipant: true,
+                        faltanDatosPredio: true,
+                      });
+                    }
+                  },
+                  { text: 'Cancelar', style: 'cancel' }
+                ]
+              );
+            } else {
+              setParticipantNotFound(cedula);
+            }
           } else {
             const newParticipant = createBlankParticipant(cedula);
 
