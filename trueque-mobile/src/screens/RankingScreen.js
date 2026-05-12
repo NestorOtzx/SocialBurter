@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Modal, Pressable, StyleSheet, Text, View, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import * as Print from 'expo-print';
 import AppHeader from '../components/AppHeader';
 import EmptyState from '../components/EmptyState';
 import { colors, fonts, spacing } from '../constants/theme';
@@ -14,6 +17,7 @@ export default function RankingScreen({ navigation }) {
   const [ranking, setRanking] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [rule, setRule] = useState(null);
   const isOffline = useNetworkStore(state => state.isOffline);
 
   const loadRanking = async (year = selectedYear) => {
@@ -26,6 +30,7 @@ export default function RankingScreen({ navigation }) {
         puntaje: item.puntaje ?? item.score ?? 0,
       }));
       setRanking(nextRanking);
+      setRule(response?.rule || null);
     } catch (error) {
       const isOfflineState = useNetworkStore.getState().isOffline;
       if (isOfflineState && error.message.includes('cached')) {
@@ -44,6 +49,137 @@ export default function RankingScreen({ navigation }) {
   useEffect(() => {
     loadRanking(selectedYear);
   }, [selectedYear]);
+
+  const handleExportCSV = async () => {
+    try {
+      if (!ranking.length) {
+        Alert.alert('Sin datos', 'No hay registros para exportar');
+        return;
+      }
+
+      let csvContent = 'Posicion,Cedula,Nombre,Diversidad,Volumen,Practicas,Liderazgo,Puntaje\n';
+
+      ranking.forEach(item => {
+        const row = [
+          item.position,
+          item.cedula,
+          `"${item.name || ''}"`,
+          item.diversity,
+          item.volume,
+          item.practices || item.practicas ? 'Si' : 'No',
+          item.leadership || item.liderazgo ? 'Si' : 'No',
+          Number(item.puntaje).toFixed(1)
+        ].join(',');
+        csvContent += row + '\n';
+      });
+
+      const fileName = `Ranking_${selectedYear}_${Date.now()}.csv`;
+
+      if (Platform.OS === 'web') {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        return;
+      }
+
+      const filePath = FileSystem.documentDirectory + fileName;
+      await FileSystem.writeAsStringAsync(filePath, csvContent, { encoding: FileSystem.EncodingType.UTF8 });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(filePath, { UTI: 'public.comma-separated-values-text', mimeType: 'text/csv', dialogTitle: 'Compartir ranking CSV' });
+      } else {
+        Alert.alert('Exportado', `El archivo se guardó en:\n${filePath}`);
+      }
+    } catch (error) {
+      console.error('Error al exportar CSV:', error);
+      Alert.alert('Error', 'No se pudo generar el reporte CSV');
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      if (!ranking.length) {
+        Alert.alert('Sin datos', 'No hay registros para exportar');
+        return;
+      }
+
+      const rowsHTML = ranking.map(item => `
+        <tr>
+          <td>${item.position}</td>
+          <td>${item.cedula}</td>
+          <td>${item.name}</td>
+          <td>${item.diversity}</td>
+          <td>${item.volume} kg</td>
+          <td>${item.practices || item.practicas ? 'Si' : 'No'}</td>
+          <td>${item.leadership || item.liderazgo ? 'Si' : 'No'}</td>
+          <td><strong>${Number(item.puntaje).toFixed(1)}</strong></td>
+        </tr>
+      `).join('');
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Helvetica, Arial, sans-serif; padding: 20px; }
+              h1 { color: #2C3E50; text-align: center; }
+              p { text-align: center; color: #555; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; page-break-inside: auto; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              th { background-color: #f4f6f8; color: #333; }
+              tr { page-break-inside: avoid; page-break-after: auto; }
+              thead { display: table-header-group; }
+              tfoot { display: table-footer-group; }
+              tr:nth-child(even) { background-color: #fafafa; }
+              @media print {
+                body { margin: 0; padding: 10mm; }
+              }
+            </style>
+          </head>
+          <body>
+            <h1>Ranking del Trueque - ${selectedYear}</h1>
+            <p>Total de ganadores rankeados: ${ranking.length}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Cédula</th>
+                  <th>Nombre</th>
+                  <th>Diversidad</th>
+                  <th>Volumen</th>
+                  <th>Prácticas</th>
+                  <th>Liderazgo</th>
+                  <th>Puntaje Final</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHTML}
+              </tbody>
+            </table>
+          </body>
+        </html>
+      `;
+
+      if (Platform.OS === 'web') {
+        await Print.printAsync({ html });
+        return;
+      }
+
+      const { uri } = await Print.printToFileAsync({ html });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Compartir ranking PDF' });
+      } else {
+        Alert.alert('Exportado', `El archivo se guardó en:\n${uri}`);
+      }
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+      Alert.alert('Error', 'No se pudo generar el reporte PDF');
+    }
+  };
 
   const renderItem = ({ item }) => {
     const isTop1 = item.position === 1;
@@ -67,6 +203,15 @@ export default function RankingScreen({ navigation }) {
       ? '#F5E6D3'
       : '#F0F4F1';
 
+    const divPts = item.diversity * (rule?.pesos?.diversidad ? rule.pesos.diversidad / 100 : 0);
+    const volPts = item.volume * (rule?.pesos?.volumen ? rule.pesos.volumen / 100 : 0);
+    const hasPrac = item.practices || item.practicas ? 1 : 0;
+    const pracPts = hasPrac * (rule?.pesos?.practicas ? rule.pesos.practicas / 100 : 0);
+    const hasLid = item.leadership || item.liderazgo ? 1 : 0;
+    const lidPts = hasLid * (rule?.pesos?.liderazgo ? rule.pesos.liderazgo / 100 : 0);
+
+    const breakdown = `Div(${divPts.toFixed(1)}) + Vol(${volPts.toFixed(1)})\nPrac(${pracPts.toFixed(1)}) + Lid(${lidPts.toFixed(1)})`;
+
     return (
       <View style={[styles.rowCard, { borderLeftColor: podioColor }]}>
         <View style={styles.leftSection}>
@@ -82,14 +227,17 @@ export default function RankingScreen({ navigation }) {
             <Text style={styles.meta}>Cédula: {item.cedula}</Text>
             <Text style={styles.metric}>Diversidad: {item.diversity}</Text>
             <Text style={styles.metric}>Volumen: {Number(item.volume).toFixed(0)} kg</Text>
-            <Text style={styles.metric}>Practicas: {item.practices || item.practicas ? 'Si' : 'No'}</Text>
-            <Text style={styles.metric}>Liderazgo: {item.leadership || item.liderazgo ? 'Si' : 'No'}</Text>
+            <Text style={styles.metric}>Practicas: {hasPrac ? 'Si' : 'No'}</Text>
+            <Text style={styles.metric}>Liderazgo: {hasLid ? 'Si' : 'No'}</Text>
           </View>
         </View>
         <View style={styles.rightSection}>
           <Text style={styles.scoreLabel}>Puntaje</Text>
           <Text style={[styles.scoreValue, { color: isTopThree ? podioColor : colors.primary }]}>
             {Number(item.puntaje).toFixed(1)}
+          </Text>
+          <Text style={{ fontSize: 10, color: colors.mutedText, textAlign: 'right', marginTop: 4 }}>
+            {breakdown}
           </Text>
         </View>
       </View>
@@ -118,10 +266,22 @@ export default function RankingScreen({ navigation }) {
             <Text style={styles.bannerTitle}>Ranking {selectedYear}</Text>
             <Text style={styles.bannerSubtitle}>Ordenado por puntaje acumulado</Text>
 
-            <Pressable style={styles.filterButton} onPress={() => setModalVisible(true)}>
-              <Text style={styles.filterButtonText}>{selectedYear}</Text>
-              <Feather name="refresh-cw" size={16} color={colors.primary} />
-            </Pressable>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <Pressable style={styles.filterButton} onPress={() => setModalVisible(true)}>
+                <Text style={styles.filterButtonText}>{selectedYear}</Text>
+                <Feather name="calendar" size={16} color={colors.primary} />
+              </Pressable>
+              
+              <Pressable style={[styles.filterButton, { backgroundColor: 'rgba(255,255,255,0.15)' }]} onPress={handleExportCSV}>
+                <Text style={styles.filterButtonText}>CSV</Text>
+                <Feather name="file-text" size={16} color="#fff" />
+              </Pressable>
+              
+              <Pressable style={[styles.filterButton, { backgroundColor: 'rgba(255,255,255,0.15)' }]} onPress={handleExportPDF}>
+                <Text style={styles.filterButtonText}>PDF</Text>
+                <Feather name="printer" size={16} color="#fff" />
+              </Pressable>
+            </View>
             
             {isOffline && (
               <View style={{ marginTop: 12, backgroundColor: 'rgba(255,255,255,0.2)', padding: 10, borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}>

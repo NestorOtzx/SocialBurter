@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
@@ -198,12 +198,21 @@ export default function HistoricoScreen({ navigation }) {
       });
 
       const fileName = `Reporte_Trueque_${Date.now()}.csv`;
-      const filePath = FileSystem.documentDirectory + fileName;
 
+      if (Platform.OS === 'web') {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        return;
+      }
+
+      const filePath = FileSystem.documentDirectory + fileName;
       await FileSystem.writeAsStringAsync(filePath, csvContent, { encoding: FileSystem.EncodingType.UTF8 });
 
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(filePath, { mimeType: 'text/csv', dialogTitle: 'Compartir reporte CSV' });
+        await Sharing.shareAsync(filePath, { UTI: 'public.comma-separated-values-text', mimeType: 'text/csv', dialogTitle: 'Compartir reporte CSV' });
       } else {
         Alert.alert('Exportado', `El archivo se guardó en:\n${filePath}`);
       }
@@ -233,16 +242,24 @@ export default function HistoricoScreen({ navigation }) {
       `).join('');
 
       const html = `
+        <!DOCTYPE html>
         <html>
           <head>
+            <meta charset="utf-8">
             <style>
               body { font-family: Helvetica, Arial, sans-serif; padding: 20px; }
               h1 { color: #2C3E50; text-align: center; }
               p { text-align: center; color: #555; }
-              table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; page-break-inside: auto; }
               th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
               th { background-color: #f4f6f8; color: #333; }
+              tr { page-break-inside: avoid; page-break-after: auto; }
+              thead { display: table-header-group; }
+              tfoot { display: table-footer-group; }
               tr:nth-child(even) { background-color: #fafafa; }
+              @media print {
+                body { margin: 0; padding: 10mm; }
+              }
             </style>
           </head>
           <body>
@@ -267,6 +284,11 @@ export default function HistoricoScreen({ navigation }) {
           </body>
         </html>
       `;
+
+      if (Platform.OS === 'web') {
+        await Print.printAsync({ html });
+        return;
+      }
 
       const { uri } = await Print.printToFileAsync({ html });
 
