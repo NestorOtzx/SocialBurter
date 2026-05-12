@@ -30,13 +30,14 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "7910c1f3-d9b1-463d-bc93-5ea55916d6a3"
-      }
-    },
     "plugins": [
       "expo-sqlite"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "73d1a987-2521-4662-9583-2b0869aafb29"
+      }
+    },
+    "owner": "trueque-municipal-toribio"
   }
 }

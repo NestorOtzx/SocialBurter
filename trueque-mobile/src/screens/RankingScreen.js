@@ -82,8 +82,8 @@ export default function RankingScreen({ navigation }) {
             <Text style={styles.meta}>Cédula: {item.cedula}</Text>
             <Text style={styles.metric}>Diversidad: {item.diversity}</Text>
             <Text style={styles.metric}>Volumen: {Number(item.volume).toFixed(0)} kg</Text>
-            <Text style={styles.metric}>Practicas: {item.practicas ? 'Si' : 'No'}</Text>
-            <Text style={styles.metric}>Liderazgo: {item.liderazgo ? 'Si' : 'No'}</Text>
+            <Text style={styles.metric}>Practicas: {item.practices || item.practicas ? 'Si' : 'No'}</Text>
+            <Text style={styles.metric}>Liderazgo: {item.leadership || item.liderazgo ? 'Si' : 'No'}</Text>
           </View>
         </View>
         <View style={styles.rightSection}>

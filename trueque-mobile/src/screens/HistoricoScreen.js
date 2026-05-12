@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View }
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
+import { Feather } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import Chip from '../components/Chip';
 import EmptyState from '../components/EmptyState';
