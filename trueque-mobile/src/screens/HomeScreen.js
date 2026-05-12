@@ -1,10 +1,11 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MenuCard from '../components/MenuCard';
 import { colors, fonts, spacing } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
+import { useNetworkStore } from '../store/networkStore';
 
 const BANNER_SCROLL_THRESHOLD = 160;
 
@@ -25,6 +26,8 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  const isOffline = useNetworkStore((state) => state.isOffline);
+
   const menuItems = [
     {
       icon: <Feather name="user-plus" size={28} color={colors.primary} />,
@@ -40,27 +43,29 @@ export default function HomeScreen({ navigation }) {
       route: 'RegistroRapidoTruequeScreen',
       accentColor: colors.accent,
     },
-    {
-      icon: <Feather name="award" size={28} color={colors.gold} />,
-      title: 'Ranking y Premiación',
-      description: 'Ver el ranking según puntaje acumulado',
-      route: 'RankingScreen',
-      accentColor: colors.gold,
-    },
-    {
-      icon: <Feather name="bar-chart-2" size={28} color={colors.primaryLight} />,
-      title: 'Histórico de participante',
-      description: 'Consulta el histórico por número de cédula',
-      route: 'HistoricoScreen',
-      accentColor: colors.primaryLight,
-    },
-    {
-      icon: <Feather name="sliders" size={28} color={colors.mutedText} />,
-      title: 'Configurar reglas anuales',
-      description: 'Parametrizar precios y desempates',
-      route: 'ConfiguracionScreen',
-      accentColor: colors.mutedText,
-    },
+    ...(!isOffline ? [
+      {
+        icon: <Feather name="award" size={28} color={colors.gold} />,
+        title: 'Ranking y Premiación',
+        description: 'Ver el ranking según puntaje acumulado',
+        route: 'RankingScreen',
+        accentColor: colors.gold,
+      },
+      {
+        icon: <Feather name="bar-chart-2" size={28} color={colors.primaryLight} />,
+        title: 'Histórico de participante',
+        description: 'Consulta el histórico por número de cédula',
+        route: 'HistoricoScreen',
+        accentColor: colors.primaryLight,
+      },
+      {
+        icon: <Feather name="sliders" size={28} color={colors.mutedText} />,
+        title: 'Configurar reglas anuales',
+        description: 'Parametrizar precios y desempates',
+        route: 'ConfiguracionScreen',
+        accentColor: colors.mutedText,
+      },
+    ] : []),
   ];
 
   return (
