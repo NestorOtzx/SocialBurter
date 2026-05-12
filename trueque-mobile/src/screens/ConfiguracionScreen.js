@@ -5,7 +5,7 @@ import InputField from '../components/InputField';
 import SegmentedPercentageEditor from '../components/SegmentedPercentageEditor';
 import { TIE_BREAKERS } from '../constants/options';
 import { colors, fonts, spacing } from '../constants/theme';
-import { fetchConfigurationRequest, saveConfigurationRequest } from '../services/api';
+import { fetchConfigurationRequest, saveConfigurationRequest, changePasswordRequest } from '../services/api';
 import { useNetworkStore } from '../store/networkStore';
 import { Feather } from '@expo/vector-icons';
 
@@ -59,6 +59,11 @@ export default function ConfiguracionScreen({ navigation }) {
   const totalWeight = sumWeights(weights);
   const canSave = totalWeight === 100 && /^\d{4}$/.test(year) && !saving;
 
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+
   const loadConfiguration = async (eventYear) => {
     try {
       const rule = await fetchConfigurationRequest(eventYear);
@@ -98,6 +103,37 @@ export default function ConfiguracionScreen({ navigation }) {
       Alert.alert('Error', 'Ocurrio un error de red. Intenta nuevamente.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      Alert.alert('Validacion', 'Completa todos los campos de contraseña.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      Alert.alert('Validacion', 'La nueva contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Validacion', 'La nueva contraseña y la confirmacion no coinciden.');
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+      await changePasswordRequest(currentPassword, newPassword);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      Alert.alert('Exito', 'Contraseña actualizada correctamente.');
+    } catch (error) {
+      const msg = error?.response?.data?.error || 'Ocurrio un error. Intenta nuevamente.';
+      Alert.alert('Error', msg);
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -183,6 +219,40 @@ export default function ConfiguracionScreen({ navigation }) {
           disabled={!canSave}
         >
           <Text style={styles.saveButtonText}>{saving ? 'Guardando...' : 'Guardar configuracion'}</Text>
+        </Pressable>
+
+        <View style={styles.divider} />
+
+        <Text style={styles.subtitle}>Cambiar contraseña</Text>
+        <Text style={styles.subtitleHelper}>
+          Actualiza la contraseña de tu cuenta. Necesitas ingresar tu contraseña actual para confirmar el cambio.
+        </Text>
+
+        <InputField
+          label="Contraseña actual"
+          value={currentPassword}
+          onChangeText={setCurrentPassword}
+          secureTextEntry
+        />
+        <InputField
+          label="Nueva contraseña"
+          value={newPassword}
+          onChangeText={setNewPassword}
+          secureTextEntry
+        />
+        <InputField
+          label="Confirmar nueva contraseña"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
+
+        <Pressable
+          style={[styles.saveButton, savingPassword && styles.saveButtonDisabled]}
+          onPress={handleChangePassword}
+          disabled={savingPassword}
+        >
+          <Text style={styles.saveButtonText}>{savingPassword ? 'Guardando...' : 'Cambiar contraseña'}</Text>
         </Pressable>
       </ScrollView>
     </View>

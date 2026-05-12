@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
+import bcrypt from 'bcrypt';
 
 const dbPath = process.env.DB_PATH || path.join(__dirname, '..', 'trueque_municipal.db');
 
@@ -103,6 +104,15 @@ const createTablesSQL = `
     ('Papa', 'Solanum tuberosum'),
     ('Yuca', 'Manihot esculenta'),
     ('Platano', 'Musa paradisiaca');
+
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('monitor', 'admin')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `;
 
 export async function initDatabase() {
@@ -225,9 +235,32 @@ export async function migrateDatabase(): Promise<void> {
     await ensureColumn('event_rules', eventRuleColumns, 'practice_weight', `ALTER TABLE event_rules ADD COLUMN practice_weight REAL NOT NULL DEFAULT 0`);
     await ensureColumn('event_rules', eventRuleColumns, 'leadership_weight', `ALTER TABLE event_rules ADD COLUMN leadership_weight REAL NOT NULL DEFAULT 0`);
 
+    await seedDemoUsers();
+
     console.log('Database schema is current');
   } catch (error) {
     console.error('Database migration failed:', error);
     throw error;
   }
+}
+
+async function seedDemoUsers(): Promise<void> {
+  const count = await dbGet('SELECT COUNT(*) as cnt FROM users');
+  if (count?.cnt > 0) return;
+
+  const SALT_ROUNDS = 10;
+  const demoUsers = [
+    { username: 'monitor1', password: '123456', role: 'monitor' },
+    { username: 'admin1',   password: 'admin123', role: 'admin' },
+  ];
+
+  for (const user of demoUsers) {
+    const hash = await bcrypt.hash(user.password, SALT_ROUNDS);
+    await dbRun(
+      `INSERT OR IGNORE INTO users (username, password_hash, role) VALUES (?, ?, ?)`,
+      [user.username, hash, user.role]
+    );
+  }
+
+  console.log('Demo users seeded into users table');
 }
