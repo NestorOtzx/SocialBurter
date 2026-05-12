@@ -203,12 +203,14 @@ export default function RankingScreen({ navigation }) {
       ? '#F5E6D3'
       : '#F0F4F1';
 
-    const divPts = item.diversity * (rule?.pesos?.diversidad ? rule.pesos.diversidad / 100 : 0);
-    const volPts = item.volume * (rule?.pesos?.volumen ? rule.pesos.volumen / 100 : 0);
+    const weights = rule?.pesos || { diversidad: 25, volumen: 25, practicas: 25, liderazgo: 25 };
+    
+    const divPts = Number(item.diversity || 0) * (weights.diversidad / 100);
+    const volPts = Number(item.volume || 0) * (weights.volumen / 100);
     const hasPrac = item.practices || item.practicas ? 1 : 0;
-    const pracPts = hasPrac * (rule?.pesos?.practicas ? rule.pesos.practicas / 100 : 0);
+    const pracPts = hasPrac * (weights.practicas / 100);
     const hasLid = item.leadership || item.liderazgo ? 1 : 0;
-    const lidPts = hasLid * (rule?.pesos?.liderazgo ? rule.pesos.liderazgo / 100 : 0);
+    const lidPts = hasLid * (weights.liderazgo / 100);
 
     const breakdown = `Div(${divPts.toFixed(1)}) + Vol(${volPts.toFixed(1)})\nPrac(${pracPts.toFixed(1)}) + Lid(${lidPts.toFixed(1)})`;
 

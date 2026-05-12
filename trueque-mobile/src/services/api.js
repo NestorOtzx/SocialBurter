@@ -55,11 +55,11 @@ function normalizePercent(value) {
   return value <= 1 ? Math.round(value * 100) : Math.round(value);
 }
 
-function normalizeRankingResponse(response) {
+function normalizeRankingResponse(response, eventYear) {
   const ranking = response?.ranking || response?.data || response || [];
 
   return {
-    rule: response?.rule || response?.config || null,
+    rule: normalizeConfigResponse(response?.rule || response?.config || null, eventYear),
     ranking: Array.isArray(ranking)
       ? ranking.map((item) => ({
           ...item,
@@ -90,10 +90,10 @@ function normalizeConfigResponse(rule, eventYear) {
   return {
     eventYear: Number(rule.eventYear || rule.year || eventYear),
     pesos: {
-      diversidad: normalizePercent(pesos.diversidad ?? rule.diversityWeight ?? rule.diversity),
-      volumen: normalizePercent(pesos.volumen ?? rule.volumeWeight ?? rule.volume),
-      practicas: normalizePercent(pesos.practicas ?? rule.practiceWeight ?? rule.practicesWeight ?? rule.practices),
-      liderazgo: normalizePercent(pesos.liderazgo ?? rule.leadershipWeight ?? rule.leadership),
+      diversidad: normalizePercent(pesos.diversidad ?? rule.diversityWeight ?? rule.diversityweight ?? rule.diversity ?? 0),
+      volumen: normalizePercent(pesos.volumen ?? rule.volumeWeight ?? rule.volumeweight ?? rule.volume ?? 0),
+      practicas: normalizePercent(pesos.practicas ?? rule.practiceWeight ?? rule.practiceweight ?? rule.practicesWeight ?? rule.practices ?? 0),
+      liderazgo: normalizePercent(pesos.liderazgo ?? rule.leadershipWeight ?? rule.leadershipweight ?? rule.leadership ?? 0),
     },
     tieBreaker: rule.tieBreaker || rule.desempate || 'diversity',
   };
@@ -204,11 +204,11 @@ export async function fetchRankingRequest(eventYear) {
     });
 
     await saveCachedRanking(eventYear, response.data);
-    return normalizeRankingResponse(response.data);
+    return normalizeRankingResponse(response.data, eventYear);
   } catch (error) {
     if (error?.response?.status !== 404) {
       const cached = await getCachedRanking(eventYear);
-      if (cached) return normalizeRankingResponse(cached);
+      if (cached) return normalizeRankingResponse(cached, eventYear);
     }
     throw error;
   }
