@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import * as Print from 'expo-print';
 import AppHeader from '../components/AppHeader';
 import Chip from '../components/Chip';
 import EmptyState from '../components/EmptyState';
@@ -166,6 +169,117 @@ export default function HistoricoScreen({ navigation }) {
 
   const visibleItems = filteredItems.slice(0, visibleCount);
 
+  const handleExportCSV = async () => {
+    try {
+      if (!filteredItems.length) {
+        Alert.alert('Sin datos', 'No hay registros para exportar');
+        return;
+      }
+
+      // Headers
+      let csvContent = 'Cedula,Nombre,Año,Categoria,Producto,Variedad,Cantidad,Unidad,Estado,Municipio\n';
+
+      // Rows
+      filteredItems.forEach(item => {
+        const row = [
+          item.participantCedula,
+          `"${item.participantName || ''}"`,
+          item.eventYear,
+          getCategoryLabel(item.category),
+          `"${item.speciesCommonName || ''}"`,
+          `"${item.variety || ''}"`,
+          item.quantity,
+          item.unit,
+          item.stage,
+          item.municipality
+        ].join(',');
+        csvContent += row + '\n';
+      });
+
+      const fileName = `Reporte_Trueque_${Date.now()}.csv`;
+      const filePath = FileSystem.documentDirectory + fileName;
+
+      await FileSystem.writeAsStringAsync(filePath, csvContent, { encoding: FileSystem.EncodingType.UTF8 });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(filePath, { mimeType: 'text/csv', dialogTitle: 'Compartir reporte CSV' });
+      } else {
+        Alert.alert('Exportado', `El archivo se guardó en:\n${filePath}`);
+      }
+    } catch (error) {
+      console.error('Error al exportar CSV:', error);
+      Alert.alert('Error', 'No se pudo generar el reporte CSV');
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      if (!filteredItems.length) {
+        Alert.alert('Sin datos', 'No hay registros para exportar');
+        return;
+      }
+
+      const rowsHTML = filteredItems.map(item => `
+        <tr>
+          <td>${item.participantCedula}</td>
+          <td>${item.participantName}</td>
+          <td>${item.eventYear}</td>
+          <td>${getCategoryLabel(item.category)}</td>
+          <td>${item.speciesCommonName}</td>
+          <td>${item.quantity} ${item.unit}</td>
+          <td>${item.municipality}</td>
+        </tr>
+      `).join('');
+
+      const html = `
+        <html>
+          <head>
+            <style>
+              body { font-family: Helvetica, Arial, sans-serif; padding: 20px; }
+              h1 { color: #2C3E50; text-align: center; }
+              p { text-align: center; color: #555; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              th { background-color: #f4f6f8; color: #333; }
+              tr:nth-child(even) { background-color: #fafafa; }
+            </style>
+          </head>
+          <body>
+            <h1>Reporte de Aportes - Trueque Municipal</h1>
+            <p>Total de registros: ${filteredItems.length}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Cédula</th>
+                  <th>Nombre</th>
+                  <th>Año</th>
+                  <th>Categoría</th>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Municipio</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHTML}
+              </tbody>
+            </table>
+          </body>
+        </html>
+      `;
+
+      const { uri } = await Print.printToFileAsync({ html });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Compartir reporte PDF' });
+      } else {
+        Alert.alert('Exportado', `El archivo se guardó en:\n${uri}`);
+      }
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+      Alert.alert('Error', 'No se pudo generar el reporte PDF');
+    }
+  };
+
   return (
     <View style={styles.screen}>
       <AppHeader title="Consulta Histórica" showBack navigation={navigation} />
@@ -254,7 +368,21 @@ export default function HistoricoScreen({ navigation }) {
               ))}
             </View>
 
-            <Text style={styles.resultsText}>Resultados: {filteredItems.length}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, marginBottom: 10 }}>
+              <Text style={styles.resultsText}>Resultados: {filteredItems.length}</Text>
+              
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <Pressable onPress={handleExportCSV} style={[styles.exportBtn, { backgroundColor: '#2e7d32' }]}>
+                  <Feather name="file-text" size={14} color="#fff" style={{ marginRight: 5 }} />
+                  <Text style={styles.exportBtnText}>CSV</Text>
+                </Pressable>
+                
+                <Pressable onPress={handleExportPDF} style={[styles.exportBtn, { backgroundColor: '#c62828' }]}>
+                  <Feather name="file" size={14} color="#fff" style={{ marginRight: 5 }} />
+                  <Text style={styles.exportBtnText}>PDF</Text>
+                </Pressable>
+              </View>
+            </View>
           </View>
         }
         ListEmptyComponent={
@@ -433,5 +561,17 @@ const styles = StyleSheet.create({
   },
   loaderContainer: {
     paddingVertical: 40,
+  },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  exportBtnText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: fonts.bold,
   },
 });

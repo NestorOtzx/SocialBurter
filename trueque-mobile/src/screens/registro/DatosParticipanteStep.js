@@ -367,6 +367,7 @@ const styles = StyleSheet.create({
   },
   rowStack: {
     flexDirection: 'column',
+    alignItems: 'stretch',
     gap: 0,
   },
   fieldCell: {
