@@ -77,12 +77,12 @@ export async function getRanking(req: Request, res: Response) {
     const rule = await dbGet(
       `SELECT
         id,
-        event_year as eventYear,
-        diversity_weight as diversityWeight,
-        volume_weight as volumeWeight,
-        practice_weight as practiceWeight,
-        leadership_weight as leadershipWeight,
-        tie_breaker as tieBreaker
+        event_year as "eventYear",
+        diversity_weight as "diversityWeight",
+        volume_weight as "volumeWeight",
+        practice_weight as "practiceWeight",
+        leadership_weight as "leadershipWeight",
+        tie_breaker as "tieBreaker"
        FROM event_rules
        WHERE event_year = ?`,
       [Number(eventYear)]
@@ -90,10 +90,10 @@ export async function getRanking(req: Request, res: Response) {
 
     const rankingRows = await dbAll(
       `SELECT
-        p.id as participantId,
+        p.id as "participantId",
         p.cedula,
         p.name,
-        p.productive_systems as productiveSystems,
+        p.productive_systems as "productiveSystems",
         p.leadership,
         COUNT(DISTINCT LOWER(TRIM(pr.variety))) as diversity,
         COALESCE(SUM(pr.quantity), 0) as volume
@@ -155,9 +155,9 @@ export async function getHistorical(req: Request, res: Response) {
 
     const historyRows = await dbAll(
       `SELECT
-        pr.event_year as eventYear,
+        pr.event_year as "eventYear",
         p.name,
-        p.productive_systems as productiveSystems,
+        p.productive_systems as "productiveSystems",
         p.leadership,
         COUNT(DISTINCT LOWER(TRIM(pr.variety))) as diversity,
         COALESCE(SUM(pr.quantity), 0) as volume
@@ -252,13 +252,13 @@ export async function getEventRule(req: Request, res: Response) {
     const rule = await dbGet(
       `SELECT
         id,
-        event_year as eventYear,
-        diversity_weight as diversityWeight,
-        volume_weight as volumeWeight,
-        practice_weight as practiceWeight,
-        leadership_weight as leadershipWeight,
-        tie_breaker as tieBreaker,
-        updated_at as updatedAt
+        event_year as "eventYear",
+        diversity_weight as "diversityWeight",
+        volume_weight as "volumeWeight",
+        practice_weight as "practiceWeight",
+        leadership_weight as "leadershipWeight",
+        tie_breaker as "tieBreaker",
+        updated_at as "updatedAt"
        FROM event_rules
        WHERE event_year = ?`,
       [Number(eventYear)]

@@ -46,19 +46,19 @@ const participantSelectSQL = `
     municipality,
     village,
     phone,
-    annual_trades as annualTrades,
-    farm_name as farmName,
+    annual_trades as "annualTrades",
+    farm_name as "farmName",
     latitude,
     longitude,
     altitude,
     corregimiento,
-    soil_type as soilType,
-    climate_conditions as climateConditions,
-    productive_systems as productiveSystems,
+    soil_type as "soilType",
+    climate_conditions as "climateConditions",
+    productive_systems as "productiveSystems",
     leadership,
-    created_by as createdBy,
-    created_at as createdAt,
-    updated_at as updatedAt
+    created_by as "createdBy",
+    created_at as "createdAt",
+    updated_at as "updatedAt"
   FROM participants
 `;
 
