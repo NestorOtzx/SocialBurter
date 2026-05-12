@@ -15,8 +15,12 @@ if (dbClient === 'postgres') {
     console.error('DATABASE_URL is required when DB_CLIENT is postgres');
     process.exit(1);
   }
+  
+  // Limpiar parámetros como ?sslmode=require que pueden sobrescribir la configuración ssl de pg
+  const cleanUrl = databaseUrl.includes('?') ? databaseUrl.split('?')[0] : databaseUrl;
+  
   pgPool = new Pool({
-    connectionString: databaseUrl,
+    connectionString: cleanUrl,
     ssl: { rejectUnauthorized: false }
   });
   console.log('Connected to PostgreSQL database');
