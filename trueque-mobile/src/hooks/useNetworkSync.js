@@ -79,6 +79,13 @@ export const useNetworkSync = () => {
     syncDataRef.current = syncData;
   }, [syncData]);
 
+  // Trigger sync automatically when the user successfully logs in after being offline
+  useEffect(() => {
+    if (token && token !== 'OFFLINE_MODE' && !isOffline) {
+      syncDataRef.current();
+    }
+  }, [token, isOffline]);
+
   useEffect(() => {
     let isMounted = true;
     let intervalId;

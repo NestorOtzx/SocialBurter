@@ -27,7 +27,15 @@ export default function RankingScreen({ navigation }) {
       }));
       setRanking(nextRanking);
     } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error de red. Intenta nuevamente.');
+      const isOfflineState = useNetworkStore.getState().isOffline;
+      if (isOfflineState && error.message.includes('cached')) {
+        Alert.alert(
+          'Modo Offline',
+          'No hay datos guardados de ranking para este año. Conéctate a internet para ver la información.\n\nNota: Los nuevos registros no aparecerán aquí hasta que se sincronicen y el servidor calcule los puntajes.'
+        );
+      } else {
+        Alert.alert('Error', 'Ocurrió un error de red. Intenta nuevamente.');
+      }
     } finally {
       setLoading(false);
     }

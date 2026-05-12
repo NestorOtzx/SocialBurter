@@ -14,6 +14,7 @@
 
     "build:mobile": "npm --prefix trueque-mobile run build",
     "build:backend": "npm --prefix trueque-backend run build",
+    "build:android": "node scripts/build-android.js",
 
     "build": "npm run build:mobile && npm run build:backend",
 

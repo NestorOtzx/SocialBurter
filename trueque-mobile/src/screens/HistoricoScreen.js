@@ -146,12 +146,12 @@ export default function HistoricoScreen({ navigation }) {
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
-      const displayType = getContributionDisplayType(item).toLowerCase();
+      const displayType = String(getContributionDisplayType(item) || '').toLowerCase();
       const matchesCedula = debouncedCedula
-        ? item.participantCedula?.toLowerCase().includes(debouncedCedula.toLowerCase())
+        ? String(item.participantCedula || '').toLowerCase().includes(debouncedCedula.toLowerCase())
         : true;
       const matchesNombre = debouncedNombre
-        ? item.participantName?.toLowerCase().includes(debouncedNombre.toLowerCase())
+        ? String(item.participantName || '').toLowerCase().includes(debouncedNombre.toLowerCase())
         : true;
       const matchesCategory = selectedCategory === 'all' ? true : item.category === selectedCategory;
       const matchesMunicipio = selectedMunicipio === 'all' ? true : item.municipality === selectedMunicipio;
