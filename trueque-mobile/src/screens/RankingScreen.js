@@ -5,6 +5,7 @@ import AppHeader from '../components/AppHeader';
 import EmptyState from '../components/EmptyState';
 import { colors, fonts, spacing } from '../constants/theme';
 import { fetchRankingRequest } from '../services/api';
+import { useNetworkStore } from '../store/networkStore';
 
 const YEARS = ['2026', '2025', '2024', '2023', '2022'];
 
@@ -13,6 +14,7 @@ export default function RankingScreen({ navigation }) {
   const [ranking, setRanking] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const isOffline = useNetworkStore(state => state.isOffline);
 
   const loadRanking = async (year = selectedYear) => {
     try {
@@ -112,6 +114,15 @@ export default function RankingScreen({ navigation }) {
               <Text style={styles.filterButtonText}>{selectedYear}</Text>
               <Feather name="refresh-cw" size={16} color={colors.primary} />
             </Pressable>
+            
+            {isOffline && (
+              <View style={{ marginTop: 12, backgroundColor: 'rgba(255,255,255,0.2)', padding: 10, borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}>
+                <Feather name="wifi-off" size={16} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={{ color: '#fff', fontSize: 13, fontFamily: fonts.semibold }}>
+                  Modo offline: Mostrando ranking guardado.
+                </Text>
+              </View>
+            )}
           </View>
         }
         renderItem={renderItem}

@@ -4,6 +4,7 @@ import { normalizeParticipantResponse } from './participantTransforms';
 import { getStoredSession } from './authStorage';
 import { useAuthStore } from '../store/authStore';
 import { saveOfflineParticipant, saveOfflineContributions } from './localDb';
+import { getCachedRanking, saveCachedRanking, getCachedHistory, saveCachedHistory } from './profileCache';
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
@@ -187,25 +188,57 @@ export async function addContributionsRequest(participantId, eventYear, contribu
 }
 
 export async function fetchRankingRequest(eventYear) {
-  const response = await api.get('/ranking', {
-    params: {
-      eventYear,
-      year: eventYear,
-    },
-  });
+  try {
+    const netInfo = await Network.getNetworkStateAsync();
+    if (!netInfo.isConnected) {
+      const cached = await getCachedRanking(eventYear);
+      if (cached) return normalizeRankingResponse(cached);
+      throw new Error('No internet and no cached ranking data');
+    }
 
-  return normalizeRankingResponse(response.data);
+    const response = await api.get('/ranking', {
+      params: {
+        eventYear,
+        year: eventYear,
+      },
+    });
+
+    await saveCachedRanking(eventYear, response.data);
+    return normalizeRankingResponse(response.data);
+  } catch (error) {
+    if (error?.response?.status !== 404) {
+      const cached = await getCachedRanking(eventYear);
+      if (cached) return normalizeRankingResponse(cached);
+    }
+    throw error;
+  }
 }
 
 export async function fetchHistoricalContributionsRequest(eventYear) {
-  const response = await api.get('/participants/contributions', {
-    params: {
-      eventYear,
-      year: eventYear,
-    },
-  });
+  try {
+    const netInfo = await Network.getNetworkStateAsync();
+    if (!netInfo.isConnected) {
+      const cached = await getCachedHistory(eventYear);
+      if (cached) return cached;
+      throw new Error('No internet and no cached history data');
+    }
 
-  return response.data || [];
+    const response = await api.get('/participants/contributions', {
+      params: {
+        eventYear,
+        year: eventYear,
+      },
+    });
+
+    await saveCachedHistory(eventYear, response.data || []);
+    return response.data || [];
+  } catch (error) {
+    if (error?.response?.status !== 404) {
+      const cached = await getCachedHistory(eventYear);
+      if (cached) return cached;
+    }
+    throw error;
+  }
 }
 
 export async function fetchConfigurationRequest(eventYear) {

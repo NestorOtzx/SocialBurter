@@ -26,6 +26,9 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
   const handleContinue = async () => {
     const nextErrors = {
       celular: participanteData.celular ? numeric(participanteData.celular) : '',
+      nombreCompleto: participantStatus === 'offline_bypass' && !participanteData.nombreCompleto?.trim() ? 'Obligatorio en modo offline' : '',
+      municipio: participantStatus === 'offline_bypass' && !participanteData.municipio?.trim() ? 'Obligatorio en modo offline' : '',
+      vereda: participantStatus === 'offline_bypass' && !participanteData.vereda?.trim() ? 'Obligatorio en modo offline' : '',
     };
 
     setErrors(nextErrors);
@@ -125,7 +128,39 @@ export default function ResumenParticipanteTruequeStep({ navigation }) {
         <Text style={styles.summaryText}>Municipio: {participanteData.municipio || 'Sin registrar'}</Text>
       </View>
 
-      <Text style={styles.sectionTitle}>Ediciónrapida</Text>
+      <Text style={styles.sectionTitle}>
+        {participantStatus === 'offline_bypass' ? 'Datos obligatorios (Offline)' : 'Edición rápida'}
+      </Text>
+      
+      {participantStatus === 'offline_bypass' && (
+        <>
+          <InputField
+            label="Nombre Completo *"
+            value={participanteData.nombreCompleto}
+            onChangeText={(value) => mergeParticipantData({ nombreCompleto: value })}
+            placeholder="Ej: Juan Perez"
+            error={errors.nombreCompleto}
+            compact
+          />
+          <InputField
+            label="Municipio *"
+            value={participanteData.municipio}
+            onChangeText={(value) => mergeParticipantData({ municipio: value })}
+            placeholder="Ej: Toribío"
+            error={errors.municipio}
+            compact
+          />
+          <InputField
+            label="Vereda *"
+            value={participanteData.vereda}
+            onChangeText={(value) => mergeParticipantData({ vereda: value })}
+            placeholder="Ej: La Luz"
+            error={errors.vereda}
+            compact
+          />
+        </>
+      )}
+
       <InputField
         label="Celular"
         value={participanteData.celular}

@@ -6,6 +6,8 @@ import SegmentedPercentageEditor from '../components/SegmentedPercentageEditor';
 import { TIE_BREAKERS } from '../constants/options';
 import { colors, fonts, spacing } from '../constants/theme';
 import { fetchConfigurationRequest, saveConfigurationRequest } from '../services/api';
+import { useNetworkStore } from '../store/networkStore';
+import { Feather } from '@expo/vector-icons';
 
 const DEFAULT_YEAR = '2026';
 const WEIGHT_KEYS = ['diversidad', 'volumen', 'practicas', 'liderazgo'];
@@ -98,6 +100,25 @@ export default function ConfiguracionScreen({ navigation }) {
       setSaving(false);
     }
   };
+
+  const isOffline = useNetworkStore(state => state.isOffline);
+
+  if (isOffline) {
+    return (
+      <View style={styles.safeArea}>
+        <AppHeader title="Configurar Reglas" showBack navigation={navigation} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }}>
+          <Feather name="wifi-off" size={48} color={colors.mutedText} style={{ marginBottom: spacing.md }} />
+          <Text style={{ fontSize: 18, fontFamily: fonts.semibold, color: colors.text, textAlign: 'center' }}>
+            Módulo no disponible offline
+          </Text>
+          <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.mutedText, textAlign: 'center', marginTop: spacing.sm }}>
+            La configuración de reglas anuales solo se puede realizar cuando tienes conexión a internet.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.safeArea}>

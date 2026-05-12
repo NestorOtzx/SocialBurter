@@ -14,6 +14,8 @@ import {
 import { colors, fonts, shadow, spacing } from '../constants/theme';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchHistoricalContributionsRequest, deleteParticipantRequest } from '../services/api';
+import { getPendingContributions } from '../services/localDb';
+import { getCachedParticipantProfile } from '../services/profileCache';
 import { useNetworkStore } from '../store/networkStore';
 import {
   getContributionDisplayQuantity,
@@ -86,8 +88,51 @@ export default function HistoricoScreen({ navigation }) {
   const loadItems = async (year) => {
     try {
       setLoading(true);
-      const response = await fetchHistoricalContributionsRequest(year);
-      setItems(response || []);
+      let response = await fetchHistoricalContributionsRequest(year) || [];
+      
+      const isOfflineState = useNetworkStore.getState().isOffline;
+      if (isOfflineState) {
+        try {
+          const pending = await getPendingContributions();
+          const offlineItems = [];
+          
+          for (const pendingRecord of pending) {
+            if (pendingRecord.event_year.toString() !== year.toString()) continue;
+            
+            const payload = JSON.parse(pendingRecord.payload_json);
+            const cedula = pendingRecord.cedula;
+            const profile = await getCachedParticipantProfile(cedula) || {};
+            
+            const contribs = payload.contributions || [];
+            contribs.forEach((c, index) => {
+              offlineItems.push({
+                id: `offline_${pendingRecord.id}_${index}`,
+                participantId: profile.id || `offline_p_${cedula}`,
+                eventYear: pendingRecord.event_year,
+                category: c.category,
+                speciesCommonName: c.speciesCommonName,
+                speciesScientificName: c.speciesScientificName,
+                variety: c.variety,
+                quantity: c.quantity,
+                unit: c.unit,
+                stage: c.stage,
+                photoUri: c.photoUri,
+                registeredAt: pendingRecord.created_at || new Date().toISOString(),
+                participantName: profile.nombreCompleto || profile.name || 'Participante Offline',
+                participantCedula: cedula,
+                municipality: profile.municipio || profile.municipality || 'Offline',
+                village: profile.vereda || profile.village || 'Offline'
+              });
+            });
+          }
+          
+          response = [...offlineItems, ...response];
+        } catch (offlineError) {
+          console.error("Error merging offline contributions:", offlineError);
+        }
+      }
+      
+      setItems(response);
     } catch (error) {
       Alert.alert('Error', 'Ocurrió un error de red. Intenta nuevamente.');
     } finally {
@@ -142,6 +187,15 @@ export default function HistoricoScreen({ navigation }) {
             <Text style={styles.bannerSubtitle}>
               Registro de lo que cada participante ha traído al trueque
             </Text>
+
+            {isOffline && (
+              <View style={{ marginBottom: spacing.md, backgroundColor: colors.warningText, padding: 10, borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}>
+                <Feather name="wifi-off" size={16} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={{ color: '#fff', fontSize: 13, fontFamily: fonts.semibold, flex: 1 }}>
+                  Modo offline: Mostrando datos guardados y registros pendientes por sincronizar.
+                </Text>
+              </View>
+            )}
 
             <View style={styles.filterHeader}>
               <Text style={styles.filterTitle}>Filtros</Text>

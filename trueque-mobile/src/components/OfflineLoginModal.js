@@ -58,19 +58,21 @@ export default function OfflineLoginModal({ visible }) {
             Para sincronizar los datos guardados en modo offline, por favor inicia sesión.
           </Text>
 
-          <InputField
-            label="Usuario"
-            value={usuario}
-            onChangeText={setUsuario}
-            placeholder="Ej: monitor1"
-          />
-          <InputField
-            label="Contraseña"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="••••••"
-            secureTextEntry
-          />
+          <View style={{ width: '100%' }}>
+            <InputField
+              label="Usuario"
+              value={usuario}
+              onChangeText={setUsuario}
+              placeholder="Ej: monitor1"
+            />
+            <InputField
+              label="Contraseña"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••"
+              secureTextEntry
+            />
+          </View>
 
           <Pressable 
             style={[styles.button, loading && styles.buttonDisabled]} 
