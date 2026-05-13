@@ -3,7 +3,6 @@ import { ActivityIndicator, Alert, FlatList, Modal, Pressable, StyleSheet, Text,
 import { Feather } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import * as Print from 'expo-print';
 import AppHeader from '../components/AppHeader';
 import EmptyState from '../components/EmptyState';
 import { colors, fonts, spacing } from '../constants/theme';
@@ -95,89 +94,6 @@ export default function RankingScreen({ navigation }) {
     } catch (error) {
       console.error('Error al exportar CSV:', error);
       Alert.alert('Error', 'No se pudo generar el reporte CSV');
-    }
-  };
-
-  const handleExportPDF = async () => {
-    try {
-      if (!ranking.length) {
-        Alert.alert('Sin datos', 'No hay registros para exportar');
-        return;
-      }
-
-      const rowsHTML = ranking.map(item => `
-        <tr>
-          <td>${item.position}</td>
-          <td>${item.cedula}</td>
-          <td>${item.name}</td>
-          <td>${item.diversity}</td>
-          <td>${item.volume} kg</td>
-          <td>${item.practices || item.practicas ? 'Si' : 'No'}</td>
-          <td>${item.leadership || item.liderazgo ? 'Si' : 'No'}</td>
-          <td><strong>${Number(item.puntaje).toFixed(1)}</strong></td>
-        </tr>
-      `).join('');
-
-      const html = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body { font-family: Helvetica, Arial, sans-serif; padding: 20px; }
-              h1 { color: #2C3E50; text-align: center; }
-              p { text-align: center; color: #555; }
-              table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; page-break-inside: auto; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              th { background-color: #f4f6f8; color: #333; }
-              tr { page-break-inside: avoid; page-break-after: auto; }
-              thead { display: table-header-group; }
-              tfoot { display: table-footer-group; }
-              tr:nth-child(even) { background-color: #fafafa; }
-              @media print {
-                body { margin: 0; padding: 10mm; }
-              }
-            </style>
-          </head>
-          <body>
-            <h1>Ranking del Trueque - ${selectedYear}</h1>
-            <p>Total de ganadores rankeados: ${ranking.length}</p>
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Cédula</th>
-                  <th>Nombre</th>
-                  <th>Diversidad</th>
-                  <th>Volumen</th>
-                  <th>Prácticas</th>
-                  <th>Liderazgo</th>
-                  <th>Puntaje Final</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rowsHTML}
-              </tbody>
-            </table>
-          </body>
-        </html>
-      `;
-
-      if (Platform.OS === 'web') {
-        await Print.printAsync({ html });
-        return;
-      }
-
-      const { uri } = await Print.printToFileAsync({ html });
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Compartir ranking PDF' });
-      } else {
-        Alert.alert('Exportado', `El archivo se guardó en:\n${uri}`);
-      }
-    } catch (error) {
-      console.error('Error al exportar PDF:', error);
-      Alert.alert('Error', 'No se pudo generar el reporte PDF');
     }
   };
 
@@ -277,11 +193,6 @@ export default function RankingScreen({ navigation }) {
               <Pressable style={[styles.filterButton, { backgroundColor: 'rgba(255,255,255,0.15)' }]} onPress={handleExportCSV}>
                 <Text style={styles.filterButtonText}>CSV</Text>
                 <Feather name="file-text" size={16} color="#fff" />
-              </Pressable>
-              
-              <Pressable style={[styles.filterButton, { backgroundColor: 'rgba(255,255,255,0.15)' }]} onPress={handleExportPDF}>
-                <Text style={styles.filterButtonText}>PDF</Text>
-                <Feather name="printer" size={16} color="#fff" />
               </Pressable>
             </View>
             

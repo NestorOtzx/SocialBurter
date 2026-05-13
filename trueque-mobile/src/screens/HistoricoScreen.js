@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import * as Print from 'expo-print';
 import { Feather } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import Chip from '../components/Chip';
@@ -222,86 +221,6 @@ export default function HistoricoScreen({ navigation }) {
     }
   };
 
-  const handleExportPDF = async () => {
-    try {
-      if (!filteredItems.length) {
-        Alert.alert('Sin datos', 'No hay registros para exportar');
-        return;
-      }
-
-      const rowsHTML = filteredItems.map(item => `
-        <tr>
-          <td>${item.participantCedula}</td>
-          <td>${item.participantName}</td>
-          <td>${item.eventYear}</td>
-          <td>${getCategoryLabel(item.category)}</td>
-          <td>${item.speciesCommonName}</td>
-          <td>${item.quantity} ${item.unit}</td>
-          <td>${item.municipality}</td>
-        </tr>
-      `).join('');
-
-      const html = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body { font-family: Helvetica, Arial, sans-serif; padding: 20px; }
-              h1 { color: #2C3E50; text-align: center; }
-              p { text-align: center; color: #555; }
-              table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; page-break-inside: auto; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              th { background-color: #f4f6f8; color: #333; }
-              tr { page-break-inside: avoid; page-break-after: auto; }
-              thead { display: table-header-group; }
-              tfoot { display: table-footer-group; }
-              tr:nth-child(even) { background-color: #fafafa; }
-              @media print {
-                body { margin: 0; padding: 10mm; }
-              }
-            </style>
-          </head>
-          <body>
-            <h1>Reporte de Aportes - Trueque Municipal</h1>
-            <p>Total de registros: ${filteredItems.length}</p>
-            <table>
-              <thead>
-                <tr>
-                  <th>Cédula</th>
-                  <th>Nombre</th>
-                  <th>Año</th>
-                  <th>Categoría</th>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
-                  <th>Municipio</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rowsHTML}
-              </tbody>
-            </table>
-          </body>
-        </html>
-      `;
-
-      if (Platform.OS === 'web') {
-        await Print.printAsync({ html });
-        return;
-      }
-
-      const { uri } = await Print.printToFileAsync({ html });
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Compartir reporte PDF' });
-      } else {
-        Alert.alert('Exportado', `El archivo se guardó en:\n${uri}`);
-      }
-    } catch (error) {
-      console.error('Error al exportar PDF:', error);
-      Alert.alert('Error', 'No se pudo generar el reporte PDF');
-    }
-  };
 
   return (
     <View style={styles.screen}>
@@ -398,11 +317,6 @@ export default function HistoricoScreen({ navigation }) {
                 <Pressable onPress={handleExportCSV} style={[styles.exportBtn, { backgroundColor: '#2e7d32' }]}>
                   <Feather name="file-text" size={14} color="#fff" style={{ marginRight: 5 }} />
                   <Text style={styles.exportBtnText}>CSV</Text>
-                </Pressable>
-                
-                <Pressable onPress={handleExportPDF} style={[styles.exportBtn, { backgroundColor: '#c62828' }]}>
-                  <Feather name="file" size={14} color="#fff" style={{ marginRight: 5 }} />
-                  <Text style={styles.exportBtnText}>PDF</Text>
                 </Pressable>
               </View>
             </View>
