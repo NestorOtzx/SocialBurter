@@ -396,3 +396,26 @@ export async function deleteParticipant(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to delete participant' });
   }
 }
+
+export async function deleteContribution(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: 'contribution id is required' });
+    }
+
+    const record = await dbGet('SELECT id FROM product_records WHERE id = ?', [Number(id)]);
+    
+    if (!record) {
+      return res.status(404).json({ error: 'Contribution not found' });
+    }
+
+    await dbRun('DELETE FROM product_records WHERE id = ?', [Number(id)]);
+
+    res.json({ message: 'Contribution deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting contribution:', error);
+    res.status(500).json({ error: 'Failed to delete contribution' });
+  }
+}

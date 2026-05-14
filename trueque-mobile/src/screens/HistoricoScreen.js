@@ -16,7 +16,7 @@ import {
 } from '../constants/options';
 import { colors, fonts, shadow, spacing } from '../constants/theme';
 import { useDebounce } from '../hooks/useDebounce';
-import { fetchHistoricalContributionsRequest, deleteParticipantRequest } from '../services/api';
+import { fetchHistoricalContributionsRequest, deleteContributionRequest } from '../services/api';
 import { getPendingContributions } from '../services/localDb';
 import { getCachedParticipantProfile } from '../services/profileCache';
 import { useNetworkStore } from '../store/networkStore';
@@ -62,14 +62,14 @@ export default function HistoricoScreen({ navigation }) {
   const debouncedCedula = useDebounce(cedula, 450);
   const debouncedNombre = useDebounce(nombre, 450);
 
-  const handleDeleteParticipant = (targetCedula) => {
+  const handleDeleteContribution = (id, productName) => {
     if (isOffline) {
       Alert.alert('Error', 'Necesitas conexión a internet para eliminar registros.');
       return;
     }
     Alert.alert(
-      'Eliminar Participante',
-      `¿Estás seguro que deseas eliminar TODO el historial del participante con cédula ${targetCedula}? Esta acción no se puede deshacer.`,
+      'Eliminar Producto',
+      `¿Estás seguro que deseas eliminar el producto "${productName}"? Esta acción no se puede deshacer.`,
       [
         { text: 'Cancelar', style: 'cancel' },
         { 
@@ -78,11 +78,11 @@ export default function HistoricoScreen({ navigation }) {
           onPress: async () => {
             try {
               setLoading(true);
-              await deleteParticipantRequest(targetCedula);
-              Alert.alert('Éxito', 'Participante eliminado correctamente.');
+              await deleteContributionRequest(id);
+              Alert.alert('Éxito', 'Producto eliminado correctamente.');
               loadItems(selectedYear); // reload
             } catch (error) {
-              Alert.alert('Error', 'No se pudo eliminar el participante.');
+              Alert.alert('Error', 'No se pudo eliminar el producto.');
             } finally {
               setLoading(false);
             }
@@ -155,7 +155,7 @@ export default function HistoricoScreen({ navigation }) {
     return items.filter((item) => {
       const displayType = String(getContributionDisplayType(item) || '').toLowerCase();
       const matchesCedula = debouncedCedula
-        ? String(item.participantCedula || '').toLowerCase().includes(debouncedCedula.toLowerCase())
+        ? String(item.participantCedula || item.cedula || '').toLowerCase() === debouncedCedula.toLowerCase()
         : true;
       const matchesNombre = debouncedNombre
         ? String(item.participantName || '').toLowerCase().includes(debouncedNombre.toLowerCase())
@@ -373,9 +373,9 @@ export default function HistoricoScreen({ navigation }) {
               {!isOffline && (
                 <Pressable 
                   style={{ marginTop: 12, padding: 8, backgroundColor: colors.warningText, borderRadius: 8, alignItems: 'center' }}
-                  onPress={() => handleDeleteParticipant(item.participantCedula)}
+                  onPress={() => handleDeleteContribution(item.id, item.speciesCommonName || 'Producto')}
                 >
-                  <Text style={{ color: '#fff', fontSize: 12, fontFamily: fonts.semibold }}>Eliminar Participante</Text>
+                  <Text style={{ color: '#fff', fontSize: 12, fontFamily: fonts.semibold }}>Eliminar Producto</Text>
                 </Pressable>
               )}
             </View>

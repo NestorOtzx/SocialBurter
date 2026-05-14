@@ -273,6 +273,11 @@ export async function deleteParticipantRequest(cedula) {
   return response.data;
 }
 
+export async function deleteContributionRequest(id) {
+  const response = await api.delete(`/participants/contributions/${id}`);
+  return response.data;
+}
+
 export async function changePasswordRequest(currentPassword, newPassword) {
   const response = await api.post('/auth/change-password', {
     currentPassword,
