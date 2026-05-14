@@ -1,3 +1,12 @@
 {
-  "expo": {}
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "9771aa7b-85d3-4796-af2d-3584122d34f0"
+      }
+    },
+    "android": {
+      "package": "com.truequemunicipaltoribio.socialburter"
+    }
+  }
 }

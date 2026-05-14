@@ -128,7 +128,7 @@ export default function RankingScreen({ navigation }) {
     const hasLid = item.leadership || item.liderazgo ? 1 : 0;
     const lidPts = hasLid * (weights.liderazgo / 100);
 
-    const breakdown = `Div(${divPts.toFixed(1)}) + Vol(${volPts.toFixed(1)})\nPrac(${pracPts.toFixed(1)}) + Lid(${lidPts.toFixed(1)})`;
+    const breakdown = `Div(${divPts.toFixed(2)}) + Vol(${volPts.toFixed(2)})\nPrac(${pracPts.toFixed(2)}) + Lid(${lidPts.toFixed(2)})`;
 
     return (
       <View style={[styles.rowCard, { borderLeftColor: podioColor }]}>
