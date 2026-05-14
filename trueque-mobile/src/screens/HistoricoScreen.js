@@ -387,9 +387,19 @@ export default function HistoricoScreen({ navigation }) {
               <Text style={styles.cardDetail}>Vereda: {item.village || 'No registrado'}</Text>
               <Text style={styles.cardDetail}>Fecha: {formatHistoricDate(item.registeredAt)}</Text>
               
-              {item.id && !String(item.id).startsWith('offline') && !isOffline && (
+              {item.id && !String(item.id).startsWith('offline') && (
                 <Pressable 
-                  style={{ marginTop: 12, padding: 8, backgroundColor: colors.warningText, borderRadius: 8, alignItems: 'center' }}
+                  style={({ pressed }) => [
+                    { 
+                      marginTop: 12, 
+                      padding: 8, 
+                      backgroundColor: colors.warningText, 
+                      borderRadius: 8, 
+                      alignItems: 'center',
+                      opacity: pressed ? 0.7 : 1,
+                      cursor: Platform.OS === 'web' ? 'pointer' : 'auto'
+                    }
+                  ]}
                   onPress={() => handleDeleteContribution(item.id, item.speciesCommonName || 'Producto')}
                 >
                   <Text style={{ color: '#fff', fontSize: 12, fontFamily: fonts.semibold }}>Eliminar Producto</Text>
