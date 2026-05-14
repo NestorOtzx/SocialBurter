@@ -315,19 +315,19 @@ export async function listParticipants(req: Request, res: Response) {
           p.municipality,
           p.village,
           p.phone,
-          p.annual_trades as annualTrades,
-          p.farm_name as farmName,
+          p.annual_trades as "annualTrades",
+          p.farm_name as "farmName",
           p.latitude,
           p.longitude,
           p.altitude,
           p.corregimiento,
-          p.soil_type as soilType,
-          p.climate_conditions as climateConditions,
-          p.productive_systems as productiveSystems,
+          p.soil_type as "soilType",
+          p.climate_conditions as "climateConditions",
+          p.productive_systems as "productiveSystems",
           p.leadership,
-          p.created_by as createdBy,
-          p.created_at as createdAt,
-          p.updated_at as updatedAt
+          p.created_by as "createdBy",
+          p.created_at as "createdAt",
+          p.updated_at as "updatedAt"
        FROM participants p
        JOIN product_records pr ON pr.participant_id = p.id
        WHERE pr.event_year = ?
@@ -351,12 +351,12 @@ export async function listContributions(req: Request, res: Response) {
     }
 
     const contributions = await dbAll(
-      `SELECT pr.id, pr.participant_id as participantId, pr.event_year as eventYear,
-              pr.category, pr.species_common_name as speciesCommonName,
-              pr.species_scientific_name as speciesScientificName,
-              pr.variety, pr.quantity, pr.unit, pr.stage, pr.photo_uri as photoUri,
-              pr.registered_at as registeredAt,
-              p.name as participantName, p.cedula as participantCedula,
+      `SELECT pr.id, pr.participant_id as "participantId", pr.event_year as "eventYear",
+              pr.category, pr.species_common_name as "speciesCommonName",
+              pr.species_scientific_name as "speciesScientificName",
+              pr.variety, pr.quantity, pr.unit, pr.stage, pr.photo_uri as "photoUri",
+              pr.registered_at as "registeredAt",
+              p.name as "participantName", p.cedula as "participantCedula",
               p.municipality, p.village
        FROM product_records pr
        JOIN participants p ON p.id = pr.participant_id

@@ -35,10 +35,14 @@ const MUNICIPALITY_FILTERS = [
 const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
 function formatHistoricDate(dateValue) {
-  const date = new Date(dateValue);
-
+  if (!dateValue) return 'Sin fecha';
+  
+  // Handle SQLite format with space instead of T
+  const safeDate = typeof dateValue === 'string' ? dateValue.replace(' ', 'T') : dateValue;
+  const date = new Date(safeDate);
+  
   if (Number.isNaN(date.getTime())) {
-    return '-';
+    return 'Sin fecha';
   }
 
   return `${date.getDate()} de ${MONTHS[date.getMonth()]} de ${date.getFullYear()}`;
@@ -340,9 +344,9 @@ export default function HistoricoScreen({ navigation }) {
           return (
             <View style={styles.card}>
               <Text style={styles.cardName} numberOfLines={2}>
-                {item.participantName}
+                {item.participantName || 'Nombre no disponible'}
               </Text>
-              <Text style={styles.cardCedula}>CC {item.participantCedula}</Text>
+              <Text style={styles.cardCedula}>CC {item.participantCedula || item.cedula || '---'}</Text>
 
               <View style={styles.badgesRow}>
                 <View style={styles.yearBadge}>
@@ -361,9 +365,9 @@ export default function HistoricoScreen({ navigation }) {
               <Text style={styles.cardDetail}>
                 Cantidad: {aporteCantidad} {aporteUnidad}
               </Text>
-              <Text style={styles.cardDetail}>Estado: {item.stage || 'llega'}</Text>
-              <Text style={styles.cardDetail}>Municipio: {item.municipality}</Text>
-              <Text style={styles.cardDetail}>Vereda: {item.village}</Text>
+              <Text style={styles.cardDetail}>Estado: {item.stage || 'No registrado'}</Text>
+              <Text style={styles.cardDetail}>Municipio: {item.municipality || 'No registrado'}</Text>
+              <Text style={styles.cardDetail}>Vereda: {item.village || 'No registrado'}</Text>
               <Text style={styles.cardDetail}>Fecha: {formatHistoricDate(item.registeredAt)}</Text>
               
               {!isOffline && (
