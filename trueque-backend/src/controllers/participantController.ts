@@ -351,18 +351,18 @@ export async function listContributions(req: Request, res: Response) {
     }
 
     const contributions = await dbAll(
-      `SELECT pr.id, pr.participant_id as "participantId", pr.event_year as "eventYear",
+      `SELECT pr.id, pr.participant_id as "participantId", 
+              COALESCE(pr.event_year, ?) as "eventYear",
               pr.category, pr.species_common_name as "speciesCommonName",
               pr.species_scientific_name as "speciesScientificName",
               pr.variety, pr.quantity, pr.unit, pr.stage, pr.photo_uri as "photoUri",
               pr.registered_at as "registeredAt",
               p.name as "participantName", p.cedula as "participantCedula",
               p.municipality, p.village
-       FROM product_records pr
-       JOIN participants p ON p.id = pr.participant_id
-       WHERE pr.event_year = ?
-       ORDER BY pr.registered_at DESC`,
-      [Number(eventYear)]
+       FROM participants p
+       LEFT JOIN product_records pr ON p.id = pr.participant_id AND pr.event_year = ?
+       ORDER BY pr.registered_at DESC, p.name ASC`,
+      [Number(eventYear), Number(eventYear)]
     );
 
     res.json(contributions);

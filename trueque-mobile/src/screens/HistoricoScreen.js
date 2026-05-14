@@ -62,12 +62,27 @@ export default function HistoricoScreen({ navigation }) {
   const debouncedCedula = useDebounce(cedula, 450);
   const debouncedNombre = useDebounce(nombre, 450);
 
+  const showAlert = (title, message, buttons) => {
+    if (Platform.OS === 'web') {
+      const confirmButton = buttons.find(b => b.style === 'destructive' || b.text === 'Eliminar' || b.text === 'Aceptar');
+      if (window.confirm(`${title}\n\n${message}`)) {
+        if (confirmButton && confirmButton.onPress) confirmButton.onPress();
+      }
+    } else {
+      Alert.alert(title, message, buttons);
+    }
+  };
+
   const handleDeleteContribution = (id, productName) => {
-    if (isOffline) {
-      Alert.alert('Error', 'Necesitas conexión a internet para eliminar registros.');
+    if (!id || String(id).startsWith('offline')) {
+      Alert.alert('Error', 'No se puede eliminar un registro que aún no se ha sincronizado.');
       return;
     }
-    Alert.alert(
+    if (isOffline) {
+      showAlert('Error', 'Necesitas conexión a internet para eliminar registros.', [{ text: 'Aceptar' }]);
+      return;
+    }
+    showAlert(
       'Eliminar Producto',
       `¿Estás seguro que deseas eliminar el producto "${productName}"? Esta acción no se puede deshacer.`,
       [
@@ -78,11 +93,13 @@ export default function HistoricoScreen({ navigation }) {
           onPress: async () => {
             try {
               setLoading(true);
+              console.log('Eliminando producto ID:', id);
               await deleteContributionRequest(id);
-              Alert.alert('Éxito', 'Producto eliminado correctamente.');
+              showAlert('Éxito', 'Producto eliminado correctamente.', [{ text: 'Aceptar' }]);
               loadItems(selectedYear); // reload
             } catch (error) {
-              Alert.alert('Error', 'No se pudo eliminar el producto.');
+              console.error('Error al eliminar:', error);
+              showAlert('Error', 'No se pudo eliminar el producto.', [{ text: 'Aceptar' }]);
             } finally {
               setLoading(false);
             }
@@ -370,13 +387,19 @@ export default function HistoricoScreen({ navigation }) {
               <Text style={styles.cardDetail}>Vereda: {item.village || 'No registrado'}</Text>
               <Text style={styles.cardDetail}>Fecha: {formatHistoricDate(item.registeredAt)}</Text>
               
-              {!isOffline && (
+              {item.id && !String(item.id).startsWith('offline') && !isOffline && (
                 <Pressable 
                   style={{ marginTop: 12, padding: 8, backgroundColor: colors.warningText, borderRadius: 8, alignItems: 'center' }}
                   onPress={() => handleDeleteContribution(item.id, item.speciesCommonName || 'Producto')}
                 >
                   <Text style={{ color: '#fff', fontSize: 12, fontFamily: fonts.semibold }}>Eliminar Producto</Text>
                 </Pressable>
+              )}
+              
+              {!item.id && (
+                <View style={{ marginTop: 12, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 8, alignItems: 'center' }}>
+                  <Text style={{ color: '#666', fontSize: 11, fontFamily: fonts.italic }}>Sin aportes registrados</Text>
+                </View>
               )}
             </View>
           );
