@@ -75,17 +75,17 @@ function normalizeRankingResponse(response, eventYear) {
 export function normalizeParticipantFields(item) {
   if (!item) return {};
   return {
-    participantName: item?.participantName ?? item?.participantname ?? item?.name ?? null,
+    participantName: item?.participantName ?? item?.participantname ?? item?.nombreCompleto ?? item?.name ?? null,
     participantCedula: item?.participantCedula ?? item?.participantcedula ?? item?.cedula ?? null,
-    farmName: item?.farmName ?? item?.farmname ?? item?.farm_name ?? null,
+    farmName: item?.farmName ?? item?.farmname ?? item?.nombreFinca ?? item?.farm_name ?? null,
     municipality: item?.municipality ?? item?.municipio ?? null,
     village: item?.village ?? item?.vereda ?? null,
-    phone: item?.phone ?? item?.telefono ?? null,
+    phone: item?.phone ?? item?.telefono ?? item?.celular ?? null,
     corregimiento: item?.corregimiento ?? null,
-    soilType: item?.soilType ?? item?.soiltype ?? item?.soil_type ?? null,
-    climateConditions: item?.climateConditions ?? item?.climateconditions ?? item?.climate_conditions ?? null,
-    annualTrades: item?.annualTrades ?? item?.annualtrades ?? item?.annual_trades ?? 0,
-    productiveSystems: item?.productiveSystems ?? item?.productivesystems ?? item?.productive_systems ?? null,
+    soilType: item?.soilType ?? item?.soiltype ?? item?.tipoSuelo ?? item?.soil_type ?? null,
+    climateConditions: item?.climateConditions ?? item?.climateconditions ?? item?.condicionesClimaticas ?? item?.climate_conditions ?? null,
+    annualTrades: item?.annualTrades ?? item?.annualtrades ?? item?.truequesAnio ?? item?.annual_trades ?? 0,
+    productiveSystems: item?.productiveSystems ?? item?.productivesystems ?? item?.sistemasProductivos ?? item?.productive_systems ?? null,
   };
 }
 

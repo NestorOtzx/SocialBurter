@@ -146,7 +146,10 @@ export default function HistoricoScreen({ navigation }) {
                 participantName: profile.nombreCompleto || profile.name || 'Participante Offline',
                 participantCedula: cedula,
                 municipality: profile.municipio || profile.municipality || 'Offline',
-                village: profile.vereda || profile.village || 'Offline'
+                village: profile.vereda || profile.village || 'Offline',
+                corregimiento: profile.corregimiento || 'Offline',
+                farmName: profile.farmName || profile.farm_name || 'Offline',
+                phone: profile.phone || profile.phone || 'Offline',
               });
             });
           }

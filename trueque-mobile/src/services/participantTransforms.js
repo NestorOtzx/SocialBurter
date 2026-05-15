@@ -32,44 +32,45 @@ export function createBlankParticipant(cedula = '') {
 }
 
 export function normalizeParticipantResponse(backendParticipant = {}) {
+  const item = backendParticipant;
   return {
     ...emptyParticipantData,
-    id: backendParticipant.id || null,
+    id: item.id || null,
     cedula: normalizeString(
-      backendParticipant.cedula || backendParticipant.document || backendParticipant.identification
+      item.cedula || item.participantCedula || item.participantcedula || item.document || item.identification
     ),
     nombreCompleto: normalizeString(
-      backendParticipant.nombreCompleto || backendParticipant.name || backendParticipant.fullName
+      item.nombreCompleto || item.participantName || item.participantname || item.name || item.fullName
     ),
     celular: normalizeString(
-      backendParticipant.celular || backendParticipant.phone || backendParticipant.mobile
+      item.celular || item.phone || item.telefono || item.mobile
     ),
     truequesAnio: normalizeString(
-      backendParticipant.truequesAnio || backendParticipant.annualTrades || backendParticipant.tradeCount || 0
+      item.truequesAnio || item.annualTrades || item.annualtrades || item.tradeCount || 0
     ),
     nombreFinca: normalizeString(
-      backendParticipant.nombreFinca || backendParticipant.farmName || backendParticipant.finca
+      item.nombreFinca || item.farmName || item.farmname || item.finca || item.farm_name
     ),
-    latitud: normalizeString(backendParticipant.latitud || backendParticipant.latitude),
-    longitud: normalizeString(backendParticipant.longitud || backendParticipant.longitude),
-    altitud: normalizeString(backendParticipant.altitud || backendParticipant.altitude),
+    latitud: normalizeString(item.latitud || item.latitude),
+    longitud: normalizeString(item.longitud || item.longitude),
+    altitud: normalizeString(item.altitud || item.altitude),
     municipio: normalizeString(
-      backendParticipant.municipio || backendParticipant.municipality
+      item.municipio || item.municipality
     ),
-    corregimiento: normalizeString(backendParticipant.corregimiento),
-    vereda: normalizeString(backendParticipant.vereda || backendParticipant.village),
-    tipoSuelo: normalizeString(backendParticipant.tipoSuelo || backendParticipant.soilType),
+    corregimiento: normalizeString(item.corregimiento),
+    vereda: normalizeString(item.vereda || item.village),
+    tipoSuelo: normalizeString(item.tipoSuelo || item.soilType || item.soiltype || item.soil_type),
     condicionesClimaticas: normalizeString(
-      backendParticipant.condicionesClimaticas || backendParticipant.climateConditions
+      item.condicionesClimaticas || item.climateConditions || item.climateconditions || item.climate_conditions
     ),
     sistemasProductivos: normalizeStringArray(
-      backendParticipant.sistemasProductivos || backendParticipant.productiveSystems
+      item.sistemasProductivos || item.productiveSystems || item.productivesystems || item.productive_systems
     ),
-    liderazgo: normalizeStringArray(backendParticipant.liderazgo || backendParticipant.leadership),
+    liderazgo: normalizeStringArray(item.liderazgo || item.leadership),
     esPreRegistro: Boolean(
-      backendParticipant.esPreRegistro ||
-        backendParticipant.isPreRegistered ||
-        backendParticipant.preRegistered
+      item.esPreRegistro ||
+        item.isPreRegistered ||
+        item.preRegistered
     ),
   };
 }
