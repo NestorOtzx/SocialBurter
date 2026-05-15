@@ -63,6 +63,7 @@ function normalizeRankingResponse(response, eventYear) {
     ranking: Array.isArray(ranking)
       ? ranking.map((item) => ({
           ...item,
+          ...normalizeParticipantFields(item),
           puntaje: item?.puntaje ?? item?.score ?? 0,
           practicas: item?.practicas ?? item?.practice ?? item?.practices ?? 0,
           liderazgo: item?.liderazgo ?? item?.leadership ?? 0,
@@ -70,6 +71,24 @@ function normalizeRankingResponse(response, eventYear) {
       : [],
   };
 }
+
+export function normalizeParticipantFields(item) {
+  if (!item) return {};
+  return {
+    participantName: item?.participantName ?? item?.participantname ?? item?.name ?? null,
+    participantCedula: item?.participantCedula ?? item?.participantcedula ?? item?.cedula ?? null,
+    farmName: item?.farmName ?? item?.farmname ?? item?.farm_name ?? null,
+    municipality: item?.municipality ?? item?.municipio ?? null,
+    village: item?.village ?? item?.vereda ?? null,
+    phone: item?.phone ?? item?.telefono ?? null,
+    corregimiento: item?.corregimiento ?? null,
+    soilType: item?.soilType ?? item?.soiltype ?? item?.soil_type ?? null,
+    climateConditions: item?.climateConditions ?? item?.climateconditions ?? item?.climate_conditions ?? null,
+    annualTrades: item?.annualTrades ?? item?.annualtrades ?? item?.annual_trades ?? 0,
+    productiveSystems: item?.productiveSystems ?? item?.productivesystems ?? item?.productive_systems ?? null,
+  };
+}
+
 
 function normalizeConfigResponse(rule, eventYear) {
   if (!rule) {
@@ -231,7 +250,14 @@ export async function fetchHistoricalContributionsRequest(eventYear) {
     });
 
     await saveCachedHistory(eventYear, response.data || []);
-    return response.data || [];
+    return (response.data || []).map(item => ({
+      ...item,
+      ...normalizeParticipantFields(item),
+      // Also handle product specific fields just in case
+      speciesCommonName: item?.speciesCommonName ?? item?.speciescommonname ?? null,
+      speciesScientificName: item?.speciesScientificName ?? item?.speciesscientificname ?? null,
+      registeredAt: item?.registeredAt ?? item?.registeredat ?? null,
+    }));
   } catch (error) {
     if (error?.response?.status !== 404) {
       const cached = await getCachedHistory(eventYear);

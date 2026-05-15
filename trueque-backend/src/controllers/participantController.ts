@@ -358,7 +358,7 @@ export async function listContributions(req: Request, res: Response) {
               pr.variety, pr.quantity, pr.unit, pr.stage, pr.photo_uri as "photoUri",
               pr.registered_at as "registeredAt",
               p.name as "participantName", p.cedula as "participantCedula",
-              p.municipality, p.village
+              p.municipality, p.village, p.phone, p.farm_name as "farmName", p.corregimiento
        FROM participants p
        LEFT JOIN product_records pr ON p.id = pr.participant_id AND pr.event_year = ?
        ORDER BY pr.registered_at DESC, p.name ASC`,
