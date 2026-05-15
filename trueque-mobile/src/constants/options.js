@@ -119,3 +119,13 @@ export const getCategoryUnit = (value) => getCategoryConfig(value)?.unit || 'kg'
 
 export const getCategoryPlaceholder = (value) =>
   getCategoryConfig(value)?.placeholder || 'Ej: Fríjol cargamanto, Manzana, Papa criolla';
+
+export const CONTRIBUTION_STAGES = [
+  { label: 'Ingreso / Llegada', value: 'llega' },
+  { label: 'Distribución', value: 'distribuye' },
+  { label: 'Finalizado', value: 'finaliza' },
+];
+
+export const getStageLabel = (value) =>
+  CONTRIBUTION_STAGES.find((s) => s.value === value)?.label || value;
+

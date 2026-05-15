@@ -143,10 +143,18 @@ export default function RankingScreen({ navigation }) {
               {item.name}
             </Text>
             <Text style={styles.meta}>Cédula: {item.cedula}</Text>
-            <Text style={styles.metric}>Diversidad: {item.diversity}</Text>
-            <Text style={styles.metric}>Volumen: {Number(item.volume).toFixed(0)} kg</Text>
-            <Text style={styles.metric}>Practicas: {hasPrac ? 'Si' : 'No'}</Text>
-            <Text style={styles.metric}>Liderazgo: {hasLid ? 'Si' : 'No'}</Text>
+            <Text style={styles.metric}>Finca: {item.farmName || 'No registrada'}</Text>
+            <Text style={styles.metric}>Ubicación: {item.municipality}, {item.corregimiento}, {item.village}</Text>
+            <Text style={styles.metric}>Contacto: {item.phone || 'No registrado'}</Text>
+            
+            <View style={{ marginTop: 6, borderTopWidth: 1, borderTopColor: '#f0f0f0', paddingTop: 4 }}>
+              <Text style={styles.metric}>Diversidad: {item.diversity}</Text>
+              <Text style={styles.metric}>Volumen: {Number(item.volume).toFixed(1)} kg</Text>
+              <Text style={styles.metric}>Practicas: {hasPrac ? 'Si' : 'No'}</Text>
+              <Text style={styles.metric}>Liderazgo: {hasLid ? 'Si' : 'No'}</Text>
+              <Text style={styles.metric}>Intercambios: {item.annualTrades || 0}</Text>
+              <Text style={styles.metric}>Suelo/Clima: {item.soilType || 'N/A'} / {item.climateConditions || 'N/A'}</Text>
+            </View>
           </View>
         </View>
         <View style={styles.rightSection}>

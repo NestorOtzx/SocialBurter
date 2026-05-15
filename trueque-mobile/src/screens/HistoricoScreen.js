@@ -13,6 +13,7 @@ import {
   getCategoryLabel,
   HISTORICO_YEARS,
   MUNICIPIOS,
+  getStageLabel,
 } from '../constants/options';
 import { colors, fonts, shadow, spacing } from '../constants/theme';
 import { useDebounce } from '../hooks/useDebounce';
@@ -382,9 +383,20 @@ export default function HistoricoScreen({ navigation }) {
               <Text style={styles.cardDetail}>
                 Cantidad: {aporteCantidad} {aporteUnidad}
               </Text>
-              <Text style={styles.cardDetail}>Estado: {item.stage || 'No registrado'}</Text>
+              <Text style={styles.cardDetail}>
+                Variedad: {item.variety || 'No especificada'}
+              </Text>
+              {item.speciesScientificName && (
+                <Text style={styles.cardDetail}>
+                  Científico: {item.speciesScientificName}
+                </Text>
+              )}
+              <Text style={styles.cardDetail}>Estado: {getStageLabel(item.stage)}</Text>
               <Text style={styles.cardDetail}>Municipio: {item.municipality || 'No registrado'}</Text>
+              <Text style={styles.cardDetail}>Corregimiento: {item.corregimiento || 'No registrado'}</Text>
               <Text style={styles.cardDetail}>Vereda: {item.village || 'No registrado'}</Text>
+              <Text style={styles.cardDetail}>Finca: {item.farmName || 'No registrada'}</Text>
+              <Text style={styles.cardDetail}>Teléfono: {item.phone || 'No registrado'}</Text>
               <Text style={styles.cardDetail}>Fecha: {formatHistoricDate(item.registeredAt)}</Text>
               
               {item.id && !String(item.id).startsWith('offline') && (

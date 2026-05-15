@@ -93,6 +93,14 @@ export async function getRanking(req: Request, res: Response) {
         p.id as "participantId",
         p.cedula,
         p.name,
+        p.municipality,
+        p.village,
+        p.phone,
+        p.farm_name as "farmName",
+        p.corregimiento,
+        p.soil_type as "soilType",
+        p.climate_conditions as "climateConditions",
+        p.annual_trades as "annualTrades",
         p.productive_systems as "productiveSystems",
         p.leadership,
         COUNT(DISTINCT LOWER(TRIM(pr.variety))) as diversity,
@@ -100,7 +108,7 @@ export async function getRanking(req: Request, res: Response) {
        FROM participants p
        JOIN product_records pr ON pr.participant_id = p.id
        WHERE pr.event_year = ?
-       GROUP BY p.id, p.cedula, p.name, p.productive_systems, p.leadership`,
+       GROUP BY p.id, p.cedula, p.name, p.municipality, p.village, p.phone, p.farm_name, p.corregimiento, p.soil_type, p.climate_conditions, p.annual_trades, p.productive_systems, p.leadership`,
       [Number(eventYear)]
     );
 
