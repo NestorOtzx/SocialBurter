@@ -56,18 +56,26 @@ export default function RankingScreen({ navigation }) {
         return;
       }
 
-      let csvContent = 'Posicion,Cedula,Nombre,Diversidad,Volumen,Practicas,Liderazgo,Puntaje\n';
+      let csvContent = 'Posición,Cédula,Nombre,Finca,Municipio,Corregimiento,Vereda,Contacto,Diversidad,Volumen,Prácticas,Liderazgo,Intercambios,Suelo,Clima,Puntaje\n';
 
       ranking.forEach(item => {
         const row = [
           item.position,
-          item.cedula,
+          `"${item.cedula || ''}"`,
           `"${item.name || ''}"`,
+          `"${item.farmName || ''}"`,
+          `"${item.municipality || ''}"`,
+          `"${item.corregimiento || ''}"`,
+          `"${item.village || ''}"`,
+          `"${item.phone || ''}"`,
           item.diversity,
           item.volume,
-          item.practices || item.practicas ? 'Si' : 'No',
-          item.leadership || item.liderazgo ? 'Si' : 'No',
-          Number(item.puntaje).toFixed(1)
+          (item.practices || item.practicas) ? 'Sí' : 'No',
+          (item.leadership || item.liderazgo) ? 'Sí' : 'No',
+          item.annualTrades || 0,
+          `"${item.soilType || ''}"`,
+          `"${item.climateConditions || ''}"`,
+          Number(item.puntaje).toFixed(2)
         ].join(',');
         csvContent += row + '\n';
       });
@@ -150,7 +158,7 @@ export default function RankingScreen({ navigation }) {
             <View style={{ marginTop: 6, borderTopWidth: 1, borderTopColor: '#f0f0f0', paddingTop: 4 }}>
               <Text style={styles.metric}>Diversidad: {item.diversity}</Text>
               <Text style={styles.metric}>Volumen: {Number(item.volume).toFixed(1)} kg</Text>
-              <Text style={styles.metric}>Practicas: {hasPrac ? 'Si' : 'No'}</Text>
+              <Text style={styles.metric}>Prácticas: {hasPrac ? 'Sí' : 'No'}</Text>
               <Text style={styles.metric}>Liderazgo: {hasLid ? 'Si' : 'No'}</Text>
               <Text style={styles.metric}>Intercambios: {item.annualTrades || 0}</Text>
               <Text style={styles.metric}>Suelo/Clima: {item.soilType || 'N/A'} / {item.climateConditions || 'N/A'}</Text>

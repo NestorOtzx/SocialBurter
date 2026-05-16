@@ -97,7 +97,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
         setStep(3);
       }
     } catch (error) {
-      Alert.alert('Error', 'Ocurrio un error de red. Intenta nuevamente.');
+      Alert.alert('Error', 'Ocurrió un error de red. Intenta nuevamente.');
     } finally {
       setSaving(false);
     }
@@ -255,7 +255,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
       </View>
 
       <Text style={styles.sectionTitle}>
-        {isPreRegistro ? 'Ubicacióndel predio (opcional)' : 'Ubicacion'}
+        {isPreRegistro ? 'Ubicación del predio (opcional)' : 'Ubicación'}
       </Text>
       <View style={rowStyle}>
         <View style={[styles.fieldCell, styles.fieldGroup]}>
@@ -291,7 +291,7 @@ export default function DatosParticipanteStep({ completionOnly = false }) {
         </View>
         <View style={[styles.fieldCell, styles.fieldGroup]}>
           <Text style={styles.fieldLabel}>
-            {requirePredioData ? 'Condiciones climaticas *' : 'Condiciones climaticas'}
+            {requirePredioData ? 'Condiciones climáticas *' : 'Condiciones climáticas'}
           </Text>
           {renderChipGroup(CONDICIONES_CLIMATICAS, 'condicionesClimaticas')}
         </View>

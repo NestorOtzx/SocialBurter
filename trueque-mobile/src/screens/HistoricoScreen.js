@@ -202,21 +202,27 @@ export default function HistoricoScreen({ navigation }) {
       }
 
       // Headers
-      let csvContent = 'Cedula,Nombre,Año,Categoria,Producto,Variedad,Cantidad,Unidad,Estado,Municipio\n';
+      let csvContent = 'Cédula,Nombre,Año,Categoría,Producto,Científico,Variedad,Cantidad,Unidad,Estado,Municipio,Corregimiento,Vereda,Finca,Teléfono,Fecha\n';
 
       // Rows
       filteredItems.forEach(item => {
         const row = [
-          item.participantCedula,
+          `"${item.participantCedula || ''}"`,
           `"${item.participantName || ''}"`,
           item.eventYear,
-          getCategoryLabel(item.category),
+          `"${getCategoryLabel(item.category)}"`,
           `"${item.speciesCommonName || ''}"`,
+          `"${item.speciesScientificName || ''}"`,
           `"${item.variety || ''}"`,
-          item.quantity,
-          item.unit,
-          item.stage,
-          item.municipality
+          item.quantity || 0,
+          `"${item.unit || ''}"`,
+          `"${getStageLabel(item.stage)}"`,
+          `"${item.municipality || ''}"`,
+          `"${item.corregimiento || ''}"`,
+          `"${item.village || ''}"`,
+          `"${item.farmName || ''}"`,
+          `"${item.phone || ''}"`,
+          `"${formatHistoricDate(item.registeredAt)}"`
         ].join(',');
         csvContent += row + '\n';
       });

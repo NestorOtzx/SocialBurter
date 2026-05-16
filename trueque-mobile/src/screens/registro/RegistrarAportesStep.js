@@ -146,7 +146,7 @@ export default function RegistrarAportesStep({ tipoRegistro, navigation }) {
             ) : null}
           </View>
 
-          <Text style={styles.label}>Categoria *</Text>
+          <Text style={styles.label}>Categoría *</Text>
           <View style={styles.categoryGroup}>
             {APORTE_CATEGORIES.map((category) => (
               <Chip

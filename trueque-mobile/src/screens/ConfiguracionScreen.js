@@ -14,7 +14,7 @@ const WEIGHT_KEYS = ['diversidad', 'volumen', 'practicas', 'liderazgo'];
 const CRITERION_SEGMENTS = [
   { key: 'diversidad', label: 'Diversidad', color: '#95D5B2' },
   { key: 'volumen', label: 'Volumen', color: '#74C69D' },
-  { key: 'practicas', label: 'Practicas', color: '#FFD166' },
+  { key: 'practicas', label: 'Prácticas', color: '#FFD166' },
   { key: 'liderazgo', label: 'Liderazgo', color: '#F4978E' },
 ];
 const CRITERION_DETAILS = [
@@ -30,9 +30,9 @@ const CRITERION_DETAILS = [
   },
   {
     key: 'practicas',
-    title: 'Practicas sostenibles',
+    title: 'Prácticas sostenibles',
     description:
-      'Aplica cuando la producciónes agroecologica, silvopastoril o con practicas ancestrales.',
+      'Aplica cuando la producción es agroecológica, silvopastoril o con prácticas ancestrales.',
   },
   {
     key: 'liderazgo',
